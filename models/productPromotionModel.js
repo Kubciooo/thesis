@@ -35,16 +35,16 @@ const productPromotionSchema = mongoose.Schema({
   percentage: {
     type: Number,
     required: this.discountType === 'PERCENTAGE',
-    validate: function(val) {
-      return val <= 100 && val > 0; 
+    validate: function (val) {
+      return val <= 100 && val > 0;
     },
     message: "{VALUE} is not between 0 and 99"
   },
   cash: {
     type: Number,
     required: this.discountType === 'CASH',
-    validate: function(val) {
-      return val <= this.startingPrice; 
+    validate: function (val) {
+      return val <= this.startingPrice;
     },
     message: "{VALUE} must not exceed the starting price!"
   },
@@ -56,7 +56,7 @@ const productPromotionSchema = mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
-    validate: function(val) {
+    validate: function (val) {
       return val > this.startsAt;
     }
   }

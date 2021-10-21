@@ -6,13 +6,13 @@ const app = require('./app');
 
 mongoose.connect(
   process.env.DATABASE, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true
-  }, () => {
-    console.log('Database is connected!');
-  }
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true
+}, () => {
+  console.log('Database is connected!');
+}
 )
 
 const port = process.env.PORT || 8080;
