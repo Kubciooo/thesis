@@ -1,0 +1,26 @@
+{
+  "name": "offprice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kubciooo/thesis.git"
+  },
+  "author": "Paweł Kubala",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kubciooo/thesis/issues"
+  },
+  "homepage": "https://github.com/Kubciooo/thesis#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.11",
+    "validator": "^13.6.0"
+  }
+}
