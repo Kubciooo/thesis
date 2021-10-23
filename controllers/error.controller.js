@@ -1,5 +1,6 @@
 const AppError = require("../services/error.service");
 const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
+const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
 
 const ErrorController = (() => {
   const handleDuplicates = (err) => {
@@ -55,7 +56,7 @@ const ErrorController = (() => {
   const sendErrorToClient = (err, res) => {
     const { message, statusCode, name } = err;
     res.status(statusCode).json({
-      status: "Failed",
+      status: HTTP_STATUS_MESSAGES.ERROR,
       name,
       message,
     });
