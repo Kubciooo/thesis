@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require("validator");
 
 const productSchema = mongoose.Schema({
   name: {
@@ -16,6 +17,11 @@ const productSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Shop",
       required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+      validation: validator.isURL,
     },
     price: {
       type: Number,

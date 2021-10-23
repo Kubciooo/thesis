@@ -1,12 +1,6 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 
 const productPromotionSchema = mongoose.Schema({
-  url: {
-    type: String,
-    required: true,
-    validate: validator.isUrl,
-  },
   product: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -40,6 +34,7 @@ const productPromotionSchema = mongoose.Schema({
   percentage: {
     type: Number,
     required: this.discountType === "PERCENTAGE",
+    select: this.discountType === "PERCENTAGE",
     validate: function (val) {
       return val <= 100 && val > 0;
     },
@@ -48,6 +43,7 @@ const productPromotionSchema = mongoose.Schema({
   cash: {
     type: Number,
     required: this.discountType === "CASH",
+    select: this.discountType === "CASH",
     validate: function (val) {
       return val <= this.startingPrice;
     },
