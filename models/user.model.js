@@ -12,6 +12,21 @@ const userSchema = mongoose.Schema({
     required: true,
     validation: validator.isEmail,
   },
+  shops: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Shop",
+      unique: true,
+    },
+  ],
+
+  products: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      unique: true,
+    },
+  ],
   password: String,
 });
 
@@ -24,5 +39,10 @@ userSchema.methods.validatePassword = function (password) {
 };
 
 const User = mongoose.model("User", userSchema);
+
+// const user = await User.findById()
+// user.shops.push(shopID)
+// user.shops.filter(shopId => shopId !== id);
+// await user.save({validateBeforeSave: false});
 
 module.exports = User;

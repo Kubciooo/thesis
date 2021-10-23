@@ -3,8 +3,8 @@ const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
 
 const ErrorController = (() => {
   const handleDuplicates = (err) => {
-    const fieldName = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-    const message = `The value in ${fieldName} already exists in DB - please use other value`;
+    const fieldValue = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+    const message = `The value ${fieldValue} already exists in DB - please use other value`;
     const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
     const name = "Unique Duplicates Error";
     const isOperational = true;
@@ -45,7 +45,6 @@ const ErrorController = (() => {
   };
 
   const handleOtherError = (err) => {
-    console.log(err);
     const message = err.message;
     const statusCode = err.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER;
     const name = err.name;

@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.use("/categories", categoryRouter);
+app.use("/api/categories", categoryRouter);
 
 app.use(ErrorController.initialize);
 module.exports = app;
