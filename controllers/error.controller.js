@@ -4,6 +4,7 @@ const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
 
 const ErrorController = (() => {
   const handleDuplicates = (err) => {
+    console.log(err.errmsg);
     const fieldValue = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
     const message = `The value ${fieldValue} already exists in DB - please use other value`;
     const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
