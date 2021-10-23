@@ -31,6 +31,8 @@ const UserController = (() => {
       },
     });
   });
+
+  return { signup };
 })();
 
 module.exports = UserController;
