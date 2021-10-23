@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const { encryptPassword, comparePasswords } = require("../utils/password.util");
+const { encryptPassword, comparePasswords } = require("@utils/password.util");
 
 const userSchema = mongoose.Schema({
   login: {
@@ -23,6 +23,6 @@ userSchema.methods.validatePassword = function (password) {
   return comparePasswords(password, this.password);
 };
 
-const UserModel = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
-module.exports = UserModel;
+module.exports = User;

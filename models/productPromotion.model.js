@@ -67,9 +67,9 @@ const productPromotionSchema = mongoose.Schema({
   },
 });
 
-const ProductPromotionModel = mongoose.model(
+const ProductPromotion = mongoose.model(
   "ProductPromotion",
   productPromotionSchema
 );
 
-module.exports = ProductPromotionModel;
+module.exports = ProductPromotion;
