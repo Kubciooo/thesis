@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
 
 const productPromotionSchema = mongoose.Schema({
   url: {
@@ -10,17 +10,20 @@ const productPromotionSchema = mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'Shop',
+    ref: "Shop",
   },
   shop: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'Shop',
+    ref: "Shop",
   },
   type: {
     type: String,
-    enum: ['COUPON', 'PROMOTION', 'OTHER'],
-    message: "{VALUE} is not supported",
+
+    enum: {
+      values: ["COUPON", "PROMOTION", "OTHER"],
+      message: "{VALUE} is not supported",
+    },
   },
   startingPrice: {
     type: Number,
@@ -29,24 +32,26 @@ const productPromotionSchema = mongoose.Schema({
   discountType: {
     type: String,
     required: true,
-    enum: ['PERCENTAGE', 'CASH'],
-    message: "{VALUE} is not supported",
+    enum: {
+      values: ["PERCENTAGE", "CASH"],
+      message: "{VALUE} is not supported",
+    },
   },
   percentage: {
     type: Number,
-    required: this.discountType === 'PERCENTAGE',
+    required: this.discountType === "PERCENTAGE",
     validate: function (val) {
       return val <= 100 && val > 0;
     },
-    message: "{VALUE} is not between 0 and 99"
+    message: "{VALUE} is not between 0 and 99",
   },
   cash: {
     type: Number,
-    required: this.discountType === 'CASH',
+    required: this.discountType === "CASH",
     validate: function (val) {
       return val <= this.startingPrice;
     },
-    message: "{VALUE} must not exceed the starting price!"
+    message: "{VALUE} must not exceed the starting price!",
   },
   startsAt: {
     type: Date,
@@ -58,10 +63,13 @@ const productPromotionSchema = mongoose.Schema({
     required: true,
     validate: function (val) {
       return val > this.startsAt;
-    }
-  }
+    },
+  },
 });
 
-const ProductPromotionModel = mongoose.model('ProductPromotion', productPromotionSchema);
+const ProductPromotionModel = mongoose.model(
+  "ProductPromotion",
+  productPromotionSchema
+);
 
 module.exports = ProductPromotionModel;
