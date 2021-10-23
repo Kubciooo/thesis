@@ -68,7 +68,31 @@ const UserController = (() => {
     });
   });
 
-  return { signup, login };
+  const forgotPassword = tryCatch(async (req, res, next) => {
+    const user = await User.findOne({ login: req.body.login });
+
+    if (!user) {
+      return next(
+        new AppError(
+          "InvalidUser",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          "Wrong login",
+          true
+        )
+      );
+    }
+
+    const resetToken = await user.forgotPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      resetToken,
+    });
+  });
+
+  return { signup, login, forgotPassword };
 })();
 
 module.exports = UserController;

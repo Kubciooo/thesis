@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const { encryptPassword, comparePasswords } = require("../utils/password.util");
+const {
+  encryptPassword,
+  comparePasswords,
+  generatePasswordForgotToken,
+} = require("../utils/password.util");
 
 const userSchema = mongoose.Schema({
   login: {
@@ -34,6 +38,14 @@ const userSchema = mongoose.Schema({
     required: true,
     select: false,
   },
+  passwordForgotToken: {
+    type: String,
+    select: true,
+  },
+  passwordForgotTokenExpiration: {
+    type: Date,
+    select: true,
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -47,6 +59,14 @@ userSchema.methods.validatePassword = async function (password) {
   return comparePasswords(password, this.password);
 };
 
+userSchema.methods.forgotPasswordToken = async function () {
+  const { randomToken, randomTokenEncrypted } =
+    await generatePasswordForgotToken();
+  this.passwordForgotToken = randomTokenEncrypted;
+  this.passwordForgotTokenExpiration = Date.now() + 10 * 60 * 1000;
+
+  return randomToken;
+};
 const User = mongoose.model("Users", userSchema);
 
 // const user = await User.findById()
