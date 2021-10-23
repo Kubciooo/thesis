@@ -1,6 +1,6 @@
 class AppError extends Error {
-  constructor(name, statusCode, isOperational, description) {
-    super(description);
+  constructor(name, statusCode, message, isOperational = true) {
+    super(message);
 
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = name;
@@ -10,4 +10,4 @@ class AppError extends Error {
   }
 }
 
-export default AppError;
+module.exports = AppError;

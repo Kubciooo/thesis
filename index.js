@@ -1,22 +1,20 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
-dotenv.config({ path: '@root/config.env' });
-const app = require('@root/app');
+dotenv.config({ path: "./config.env" });
+const app = require("./app");
 
-mongoose.connect(
-  process.env.DATABASE, {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-  useUnifiedTopology: true
-}, () => {
-  console.log('Database is connected!');
-}
-)
+const DB = process.env.DATABASE;
+
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("DB connection successful"));
 
 const port = process.env.PORT || 8080;
 
 app.listen(port, () => {
   console.log(`App is listening on port ${port}`);
-})
+});

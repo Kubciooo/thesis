@@ -21,18 +21,8 @@
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "module-alias": "^2.2.2",
     "mongoose": "^6.0.11",
     "morgan": "^1.10.0",
     "validator": "^13.6.0"
-  },
-  "_moduleAliases": {
-    "@controllers": "src/controllers",
-    "@constants": "src/constants",
-    "@middlewares": "src/middlewares",
-    "@routes": "src/routes",
-    "@utils": "src/utils",
-    "@models": "src/models",
-    "@services": "src/services"
   }
 }
