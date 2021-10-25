@@ -6,14 +6,8 @@ const productPromotionSchema = mongoose.Schema({
     required: true,
     ref: "Shop",
   },
-  shop: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Shop",
-  },
   type: {
     type: String,
-
     enum: {
       values: ["COUPON", "PROMOTION", "OTHER"],
       message: "{VALUE} is not supported",
