@@ -1,10 +1,15 @@
 const mongoose = require("mongoose");
 
 const productPromotionSchema = mongoose.Schema({
-  product: {
+  shop: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "Shop",
+  },
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Product",
   },
   type: {
     type: String,
@@ -25,19 +30,32 @@ const productPromotionSchema = mongoose.Schema({
       message: "{VALUE} is not supported",
     },
   },
+  coupon: {
+    type: String,
+    required: function() {
+      return this.type === "COUPON"
+    },
+  },
   percentage: {
     type: Number,
-    required: this.discountType === "PERCENTAGE",
-    select: this.discountType === "PERCENTAGE",
-    validate: function (val) {
-      return val <= 100 && val > 0;
+    required: function () {
+      return this.discountType === "PERCENTAGE";
     },
-    message: "{VALUE} is not between 0 and 99",
+    select: function () {
+      return this.discountType === "PERCENTAGE";
+    },
+    min: 1,
+    max: 100,
+    message: "{VALUE} is not between 1 and 99",
   },
   cash: {
     type: Number,
-    required: this.discountType === "CASH",
-    select: this.discountType === "CASH",
+    required: function () {
+      return this.discountType === "CASH";
+    },
+    select: function () {
+      return this.discountType === "CASH";
+    },
     validate: function (val) {
       return val <= this.startingPrice;
     },

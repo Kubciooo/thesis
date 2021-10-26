@@ -31,12 +31,12 @@ const CategoryController = (() => {
     const category = await Category.findById(req.params.id);
 
     if (!category) {
-      return new AppError(
+      return next(new AppError(
         "NotFoundError",
         HTTP_STATUS_CODES.NOT_FOUND,
         `Category with id ${req.params.id} doesn't exist`,
         (isOperational = true)
-      );
+      ));
     }
 
     res.status(HTTP_STATUS_CODES.OK).json({

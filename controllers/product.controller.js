@@ -5,9 +5,8 @@ const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
 const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
 
 const ProductController = (() => {
-  /// TODO: add filters for categories and shops
   const getAllProducts = tryCatch(async (req, res, next) => {
-    const products = await Product.find();
+    const products = await Product.find(req.query);
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: "Success",
@@ -32,12 +31,12 @@ const ProductController = (() => {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      return new AppError(
+      return next(new AppError(
         "NotFoundError",
         HTTP_STATUS_CODES.NOT_FOUND,
         `Product with id ${req.params.id} doesn't exist`,
         (isOperational = true)
-      );
+      ));
     }
 
     res.status(HTTP_STATUS_CODES.OK).json({
