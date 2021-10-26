@@ -32,8 +32,8 @@ const productPromotionSchema = mongoose.Schema({
   },
   coupon: {
     type: String,
-    required: function() {
-      return this.type === "COUPON"
+    required: function () {
+      return this.type === "COUPON";
     },
   },
   percentage: {

@@ -31,12 +31,14 @@ const ShopController = (() => {
     const shop = await Shop.findById(req.params.id);
 
     if (!shop) {
-      return next(new AppError(
-        "NotFoundError",
-        HTTP_STATUS_CODES.NOT_FOUND,
-        `Shop with id ${req.params.id} doesn't exist`,
-        (isOperational = true)
-      ));
+      return next(
+        new AppError(
+          "NotFoundError",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Shop with id ${req.params.id} doesn't exist`,
+          (isOperational = true)
+        )
+      );
     }
 
     res.status(HTTP_STATUS_CODES.OK).json({

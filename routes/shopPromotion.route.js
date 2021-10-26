@@ -8,6 +8,8 @@ shopPromotionRouter
   .get(ShopPromotionController.getAllShopPromotions)
   .post(ShopPromotionController.createShopPromotion);
 
-shopPromotionRouter.route("/:id").get(ShopPromotionController.getShopPromotionsByShopId);
+shopPromotionRouter
+  .route("/:id")
+  .get(ShopPromotionController.getShopPromotionsByShopId);
 
 module.exports = shopPromotionRouter;

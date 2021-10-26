@@ -7,7 +7,9 @@ const ProductPromotion = require("../models/productPromotion.model");
 
 const ProductPromotionController = (() => {
   const getAllProductPromotions = tryCatch(async (req, res, next) => {
-    const productPromotions = await ProductPromotion.find(req.query).sort('-expiresAt');
+    const productPromotions = await ProductPromotion.find(req.query).sort(
+      "-expiresAt"
+    );
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: "Success",
@@ -30,15 +32,19 @@ const ProductPromotionController = (() => {
 
   const getProductPromotionsByProductId = tryCatch(async (req, res, next) => {
     const product = await Product.findById(req.params.id);
-    const productPromotions = await ProductPromotion.find({ product: req.params.id }).sort('-expiresAt');
+    const productPromotions = await ProductPromotion.find({
+      product: req.params.id,
+    }).sort("-expiresAt");
 
     if (!product) {
-      return next(new AppError(
-        "NotFoundError",
-        HTTP_STATUS_CODES.NOT_FOUND,
-        `Product with id ${req.params.id} doesn't exist`,
-        (isOperational = true)
-      ));
+      return next(
+        new AppError(
+          "NotFoundError",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Product with id ${req.params.id} doesn't exist`,
+          (isOperational = true)
+        )
+      );
     }
 
     res.status(HTTP_STATUS_CODES.OK).json({

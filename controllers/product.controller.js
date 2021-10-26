@@ -31,12 +31,14 @@ const ProductController = (() => {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      return next(new AppError(
-        "NotFoundError",
-        HTTP_STATUS_CODES.NOT_FOUND,
-        `Product with id ${req.params.id} doesn't exist`,
-        (isOperational = true)
-      ));
+      return next(
+        new AppError(
+          "NotFoundError",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Product with id ${req.params.id} doesn't exist`,
+          (isOperational = true)
+        )
+      );
     }
 
     res.status(HTTP_STATUS_CODES.OK).json({

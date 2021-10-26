@@ -7,13 +7,13 @@ const shopSchema = mongoose.Schema({
     maxlength: [40, "The name must have at most 40 characters"],
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
   },
   mainUrl: {
     type: String,
     validate: validator.isURL,
     required: true,
-    unique: true
+    unique: true,
   },
 });
 

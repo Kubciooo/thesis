@@ -1,7 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const ErrorController = require("./controllers/error.controller");
-const AuthorizationMiddleware = require('./middlewares/authorization.middleware');
+const AuthorizationMiddleware = require("./middlewares/authorization.middleware");
 const categoryRouter = require("./routes/category.route");
 const shopRouter = require("./routes/shop.route");
 const productRouter = require("./routes/product.route");
@@ -17,8 +17,16 @@ app.use(morgan("dev"));
 app.use("/api/categories", AuthorizationMiddleware.authorize, categoryRouter);
 app.use("/api/shops", AuthorizationMiddleware.authorize, shopRouter);
 app.use("/api/products", AuthorizationMiddleware.authorize, productRouter);
-app.use("/api/promotions/shops", AuthorizationMiddleware.authorize, shopPromotionRouter);
-app.use("/api/promotions/products", AuthorizationMiddleware.authorize, productPromotionRouter);
+app.use(
+  "/api/promotions/shops",
+  AuthorizationMiddleware.authorize,
+  shopPromotionRouter
+);
+app.use(
+  "/api/promotions/products",
+  AuthorizationMiddleware.authorize,
+  productPromotionRouter
+);
 app.use("/api/users", userRouter);
 
 app.use(ErrorController.initialize);

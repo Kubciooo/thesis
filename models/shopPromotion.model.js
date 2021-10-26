@@ -30,8 +30,8 @@ const shopPromotionSchema = mongoose.Schema({
   },
   coupon: {
     type: String,
-    required: function() {
-      return this.type === "COUPON"
+    required: function () {
+      return this.type === "COUPON";
     },
   },
   discountType: {
@@ -72,9 +72,6 @@ const shopPromotionSchema = mongoose.Schema({
   },
 });
 
-const ShopPromotion = mongoose.model(
-  "ShopPromotion",
-  shopPromotionSchema
-);
+const ShopPromotion = mongoose.model("ShopPromotion", shopPromotionSchema);
 
 module.exports = ShopPromotion;

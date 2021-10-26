@@ -7,7 +7,9 @@ const Shop = require("../models/shop.model");
 
 const ShopPromotionController = (() => {
   const getAllShopPromotions = tryCatch(async (req, res, next) => {
-    const shopPromotions = await ShopPromotion.find(req.query).sort('-expiresAt');
+    const shopPromotions = await ShopPromotion.find(req.query).sort(
+      "-expiresAt"
+    );
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: "Success",
@@ -30,15 +32,19 @@ const ShopPromotionController = (() => {
 
   const getShopPromotionsByShopId = tryCatch(async (req, res, next) => {
     const shop = await Shop.findById(req.params.id);
-    const shopPromotions = await ShopPromotion.find({ shop: req.params.id }).sort('-expiresAt');
+    const shopPromotions = await ShopPromotion.find({
+      shop: req.params.id,
+    }).sort("-expiresAt");
 
     if (!shop) {
-      return next(new AppError(
-        "NotFoundError",
-        HTTP_STATUS_CODES.NOT_FOUND,
-        `Shop with id ${req.params.id} doesn't exist`,
-        (isOperational = true)
-      ));
+      return next(
+        new AppError(
+          "NotFoundError",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Shop with id ${req.params.id} doesn't exist`,
+          (isOperational = true)
+        )
+      );
     }
 
     res.status(HTTP_STATUS_CODES.OK).json({
