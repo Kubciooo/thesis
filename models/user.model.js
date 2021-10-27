@@ -70,8 +70,8 @@ userSchema.methods.forgotPasswordToken = async function () {
 const User = mongoose.model("Users", userSchema);
 
 // const user = await User.findById()
-// user.shops.push(shopID)
-// user.shops.filter(shopId => shopId !== id);
+// user.shops.push(shopID) <- użyj tego jeżeli chcesz dodać do użytkownika 'user' sklep o id shopID
+// user.shops = user.shops.filter(id => id !== shopID); <- a tego użyj jak chcesz usunąć ten sklep
 // await user.save({validateBeforeSave: false});
 
 module.exports = User;

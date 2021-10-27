@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const { database } = require('./constants/variables');
 
 dotenv.config({ path: "./config.env" });
 const app = require("./app");
 
-const DB = process.env.DATABASE;
+const DB = database[process.env.NODE_ENV || 'development'];
 
 mongoose
   .connect(DB, {
