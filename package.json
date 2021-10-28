@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_ENV=testing jest",
     "start": "nodemon index.js"
   },
   "repository": {
@@ -27,5 +27,10 @@
     "morgan": "^1.10.0",
     "promisify": "^0.0.3",
     "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "jest": "^27.3.1",
+    "mongodb-memory-server": "^7.5.1",
+    "supertest": "^6.1.6"
   }
 }

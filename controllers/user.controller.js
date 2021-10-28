@@ -27,14 +27,19 @@ const UserController = (() => {
 
     const newUser = await user.save();
 
-    const token = jwt.sign({ id: newUser._id }, variables.jwtSecret.password[process.env.NODE_ENV], {
-      expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
-    });
+    const token = jwt.sign(
+      { id: newUser._id },
+      variables.jwtSecret.password[process.env.NODE_ENV],
+      {
+        expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
+      }
+    );
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
       message: HTTP_STATUS_MESSAGES.OK,
       data: {
         token,
+        user,
       },
     });
   });
@@ -57,14 +62,19 @@ const UserController = (() => {
       );
     }
 
-    const token = jwt.sign({ id: user._id }, variables.jwtSecret.password[process.env.NODE_ENV], {
-      expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      variables.jwtSecret.password[process.env.NODE_ENV],
+      {
+        expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
+      }
+    );
 
     res.status(HTTP_STATUS_CODES.OK).json({
       message: HTTP_STATUS_MESSAGES.OK,
       data: {
         token,
+        user,
       },
     });
   });

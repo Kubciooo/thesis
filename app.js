@@ -12,7 +12,10 @@ const productPromotionRouter = require("./routes/productPromotion.route");
 const app = express();
 
 app.use(express.json());
-app.use(morgan("dev"));
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 app.use("/api/categories", AuthorizationMiddleware.authorize, categoryRouter);
 app.use("/api/shops", AuthorizationMiddleware.authorize, shopRouter);

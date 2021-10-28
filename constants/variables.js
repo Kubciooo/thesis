@@ -6,7 +6,8 @@ module.exports = {
   jwtSecret: {
     password: {
       development: 'thisisasecretkubciokeydumdumdum',
-      production: 'thisisasecretkubciokeydumdumdum'
+      production: 'thisisasecretkubciokeydumdumdum',
+      testing: 'thisisasecretkubciokeydumdumdum'
     },
     expiresIn: {
       development: '2m',
