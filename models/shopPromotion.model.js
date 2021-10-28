@@ -67,7 +67,7 @@ const shopPromotionSchema = mongoose.Schema({
     type: Date,
     required: true,
     validate: function (val) {
-      return val > this.startsAt;
+      return val > this.startsAt && val > Date.now();
     },
   },
 });

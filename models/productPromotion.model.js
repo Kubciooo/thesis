@@ -13,6 +13,7 @@ const productPromotionSchema = mongoose.Schema({
   },
   type: {
     type: String,
+    uppercase: true,
     enum: {
       values: ["COUPON", "PROMOTION", "OTHER"],
       message: "{VALUE} is not supported",
@@ -25,6 +26,7 @@ const productPromotionSchema = mongoose.Schema({
   discountType: {
     type: String,
     required: true,
+    uppercase: true,
     enum: {
       values: ["PERCENTAGE", "CASH"],
       message: "{VALUE} is not supported",
@@ -70,7 +72,7 @@ const productPromotionSchema = mongoose.Schema({
     type: Date,
     required: true,
     validate: function (val) {
-      return val > this.startsAt;
+      return val > this.startsAt && val > Date.now();
     },
   },
 });

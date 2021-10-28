@@ -19,7 +19,7 @@ const CategoryController = (() => {
   const createCategory = tryCatch(async (req, res, next) => {
     const category = await Category.create(req.body);
 
-    res.status(HTTP_STATUS_CODES.OK).json({
+    res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
         category,

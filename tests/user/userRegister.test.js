@@ -1,6 +1,7 @@
 const request = require("supertest");
-const dbHandler = require("./db");
-const app = require("../app");
+const dbHandler = require("../db");
+const app = require("../../app");
+const HTTP_STATUS_CODES = require("../../constants/httpStatusCodes");
 
 describe("/signup route", () => {
   beforeAll(async () => await dbHandler.connect());
@@ -44,22 +45,22 @@ describe("/signup route", () => {
       login: "kubcio",
       email: "pawel@kubcio.com",
       password: "kubcio",
-      retypePassword: "kubcio2",
+      retypePassword: "kubci2o",
     });
-    expect(res.statusCode).toEqual(403);
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.FORBIDDEN);
     expect(res.body.name).toEqual('PasswordsAreSameError');
     expect(res.body.message).toEqual("Passwords are not the same");
   });
 
-  it("Should throw PasswordsAreSameError", async () => {
+  it("Should throw Validation Error for email", async () => {
     const res = await request(app).post("/api/users/signup").send({
       login: "kubcio",
-      email: "pawel@kubcio.com",
+      email: "pawel.com",
       password: "kubcio",
-      retypePassword: "kubcio2",
+      retypePassword: "kubcio",
     });
-    expect(res.statusCode).toEqual(403);
-    expect(res.body.name).toEqual('PasswordsAreSameError');
-    expect(res.body.message).toEqual("Passwords are not the same");
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
+    expect(res.body.name).toEqual('Validation Error');
+    expect(res.body.message).toEqual("Invalid input data. Validator failed for path `email` with value `pawel.com`");
   });
 });

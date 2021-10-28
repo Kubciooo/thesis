@@ -19,7 +19,7 @@ const ShopController = (() => {
   const createShop = tryCatch(async (req, res, next) => {
     const shop = await Shop.create(req.body);
 
-    res.status(HTTP_STATUS_CODES.OK).json({
+    res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
         shop,

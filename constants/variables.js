@@ -11,7 +11,7 @@ module.exports = {
     },
     expiresIn: {
       development: '2m',
-      testing: '1m',
+      testing: '30s',
       production: '10m'
     },
   }

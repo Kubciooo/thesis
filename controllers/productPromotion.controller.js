@@ -22,7 +22,7 @@ const ProductPromotionController = (() => {
   const createProductPromotion = tryCatch(async (req, res, next) => {
     const productPromotion = await ProductPromotion.create(req.body);
 
-    res.status(HTTP_STATUS_CODES.OK).json({
+    res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
         productPromotion,

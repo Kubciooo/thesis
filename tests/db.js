@@ -28,8 +28,18 @@ module.exports.closeDatabase = async () => {
 };
 
 /**
- * Remove all the data for all db collections.
+ * clear single collection
+ * @param {String} name - name of collection
  */
+module.exports.clearCollection = async (name) => {
+  const collections = mongoose.connection.collections;
+  if (collections[name]) {
+    await collections[name].deleteMany({});
+  } else {
+    console.error("Wrong collection name!");
+  }
+};
+
 module.exports.clearDatabase = async () => {
   const collections = mongoose.connection.collections;
 
