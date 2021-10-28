@@ -3,4 +3,16 @@ module.exports = {
     development: 'mongodb+srv://kubcio:ROrYGwsXRvJqdX9r@cluster0.lixwu.mongodb.net/offprice?retryWrites=true&w=majority',
     production: 'mongodb+srv://kubcio:ROrYGwsXRvJqdX9r@cluster0.lixwu.mongodb.net/offprice?retryWrites=true&w=majority'
   },
+  jwtSecret: {
+    password: {
+      development: 'thisisasecretkubciokeydumdumdum',
+      production: 'thisisasecretkubciokeydumdumdum'
+    },
+    expiresIn: {
+      development: '2m',
+      testing: '1m',
+      production: '10m'
+    },
+  }
+
 }

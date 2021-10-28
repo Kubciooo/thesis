@@ -4,9 +4,11 @@ const User = require("../models/user.model");
 const AppError = require("../services/error.service");
 const tryCatch = require("../utils/tryCatch.util");
 const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
+const variables = require("../constants/variables");
 
 const AuthorizationMiddleware = (() => {
   const authorize = tryCatch(async (req, res, next) => {
+    console.log(req.headers.authorization);
     let token;
     if (
       req.headers.authorization &&
@@ -23,7 +25,8 @@ const AuthorizationMiddleware = (() => {
         )
       );
     }
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, variables.jwtSecret.password[process.env.NODE_ENV]);
+    console.log(decoded);
     const user = await User.findById(decoded.id);
 
     if (!user) {

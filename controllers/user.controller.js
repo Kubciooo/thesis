@@ -4,6 +4,7 @@ const AppError = require("../services/error.service");
 const tryCatch = require("../utils/tryCatch.util");
 const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
 const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
+const variables = require("../constants/variables");
 
 const UserController = (() => {
   const signup = tryCatch(async (req, res, next) => {
@@ -26,8 +27,8 @@ const UserController = (() => {
 
     const newUser = await user.save();
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+    const token = jwt.sign({ id: newUser._id }, variables.jwtSecret.password[process.env.NODE_ENV], {
+      expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
     });
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
@@ -56,8 +57,8 @@ const UserController = (() => {
       );
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+    const token = jwt.sign({ id: user._id }, variables.jwtSecret.password[process.env.NODE_ENV], {
+      expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
     });
 
     res.status(HTTP_STATUS_CODES.OK).json({
