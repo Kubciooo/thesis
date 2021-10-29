@@ -2,6 +2,10 @@ const request = require("supertest");
 const dbHandler = require("../db");
 const app = require("../../app");
 
+/**
+ * @todo add tests for resetPassword/:token route
+ */
+
 describe("/forgotPassword route", () => {
   jest.setTimeout(20000);
 
@@ -38,4 +42,6 @@ describe("/forgotPassword route", () => {
     expect(res.body).toHaveProperty("message");
     expect(res.body.message).toEqual("Wrong login");
   });
+
+
 });

@@ -2,6 +2,9 @@ const request = require("supertest");
 const dbHandler = require("../db");
 const app = require("../../app");
 
+/**
+ * @todo add tests for updatePassword route
+ */
 describe("/login route", () => {
   jest.setTimeout(20000);
 

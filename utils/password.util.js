@@ -11,7 +11,7 @@ const comparePasswords = async (candidatePassword, hashedPassword) =>
 
 const generatePasswordForgotToken = async () => {
   const randomToken = crypto.randomBytes(32).toString("hex");
-  const randomTokenEncrypted = await encryptPassword(randomToken);
+  const randomTokenEncrypted = crypto.createHash('sha512').update(randomToken).digest('hex');
   return { randomToken, randomTokenEncrypted };
 };
 

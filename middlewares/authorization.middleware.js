@@ -37,6 +37,12 @@ const AuthorizationMiddleware = (() => {
       );
     }
 
+    if (user.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError('PasswordChangedError', 'User recently changed password! Please log in again.', HTTP_STATUS_CODES.INVALID)
+      );
+    }
+
     req.user = user;
     return next();
   });

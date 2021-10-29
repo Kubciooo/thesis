@@ -38,25 +38,38 @@ const userSchema = mongoose.Schema({
     required: true,
     select: false,
   },
+  passwordChangedAt: {
+    type: Date,
+  },
   passwordForgotToken: {
     type: String,
-    select: true,
   },
   passwordForgotTokenExpiration: {
     type: Date,
-    select: true,
   },
 });
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
+  if (!this.isModified("password") || this.isNew) return next();
+  this.passwordChangedAt = Date.now() - 1000;
   this.password = await encryptPassword(this.password);
   next();
 });
 
 userSchema.methods.validatePassword = async function (password) {
   return comparePasswords(password, this.password);
+};
+
+userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
 };
 
 userSchema.methods.forgotPasswordToken = async function () {
@@ -67,6 +80,7 @@ userSchema.methods.forgotPasswordToken = async function () {
 
   return randomToken;
 };
+
 const User = mongoose.model("Users", userSchema);
 
 // const user = await User.findById()
