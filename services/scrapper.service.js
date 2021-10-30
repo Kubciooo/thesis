@@ -58,6 +58,8 @@ const Scrapper = (() => {
     const scrapSinglePage = async (shopName) => {
       const candidateProducts = [];
       const page = await browser.newPage();
+      page.setDefaultNavigationTimeout(60000);
+
       const shopOptions = SITES_CONFIG[shopName];
       const productSlug = getSlug(productName, shopOptions.separator);
       let itemNameSelector = shopOptions.itemNameSelector; // some webpages redirect to the item page if no other items exist
@@ -122,4 +124,4 @@ const Scrapper = (() => {
 
 const { scrapPages } = Scrapper;
 
-scrapPages(SITES_CONFIG.names, 800, 1200, "airpods pro");
+scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air 13 256gb");
