@@ -8,6 +8,8 @@ productRouter
   .get(ProductController.getAllProducts)
   .post(ProductController.createProduct);
 
+  productRouter.route("/scrapper").get(ProductController.getProductData);
 productRouter.route("/:id").get(ProductController.getProductById);
+
 
 module.exports = productRouter;

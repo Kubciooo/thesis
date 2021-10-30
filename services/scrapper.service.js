@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const slugify = require('slugify');
 const getItemTextFromHTMLElement = require('../utils/getItemTextFromHTMLElement.util');
 const SITES_CONFIG = require('../constants/sites');
-const e = require('express');
 
 const Scrapper = (() => {
   const getSlug = (name, separator) => slugify(name, { replacement: separator, lower: true });
@@ -28,7 +27,9 @@ const Scrapper = (() => {
       for (const promotionElement of promotionElements) {
         const promotion = await page.evaluate(el => ({ name: el.innerText, url: el.href }), promotionElement);
 
-        promotion.name = stripWhitespaces(promotion.name);
+        if(promotion.name) {
+          promotion.name = stripWhitespaces(promotion.name);
+        }
         promotionsList.push(promotion);
       }
     }
@@ -39,10 +40,13 @@ const Scrapper = (() => {
   const isProductSlugIncluded = (productSlug, candidateProduct, separator) => {
     const productSlugList = productSlug.split(separator);
     const candidateProductList = candidateProduct.split(separator);
+
+
     for (const slug of productSlugList) {
       if (!candidateProductList.includes(slug)) {
-        if (!isNaN(+slug) || !candidateProduct.includes(slug))
+        if (!isNaN(+slug) || !candidateProduct.includes(slug)) {
           return false;
+        }
       }
     }
     return true;
@@ -93,14 +97,13 @@ const Scrapper = (() => {
             const price = parseFloat(formatString(priceTag, shopOptions.priceTagFormatter));
 
             const url = isSinglePage ? page.url() : await item.$eval(itemNameSelector, el => el.href);
-            const promotions = await getPromotionsListForSingleItem(page, item, shopOptions.promotionListSelector, shopOptions.promotionSelector);
+            const promotions = shopOptions.promotionListSelector ? await getPromotionsListForSingleItem(page, item, shopOptions.promotionListSelector, shopOptions.promotionSelector) : [];
 
             candidateProducts.push({ shopName: shopOptions.name, name, price, url, promotions })
           }
         }
 
-        const sortedProducts = candidateProducts.sort((a, b) => a.price - b.price);
-        return sortedProducts;
+        return candidateProducts;
       } catch (err) {
         throw err;
       }
@@ -114,14 +117,17 @@ const Scrapper = (() => {
       concatenatedProductsArray.push(...array);
     }
 
-    console.dir(concatenatedProductsArray, { depth: null });
+    const sortedProducts = concatenatedProductsArray.sort((a, b) => a.price - b.price);
+    // console.dir(sortedProducts, { depth: null });
     await browser.close();
+
+    return sortedProducts;
   }
 
   return { scrapPages };
 
 })();
 
-const { scrapPages } = Scrapper;
-
-scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air 13 256gb");
+module.exports = Scrapper;
+// const { scrapPages } = Scrapper;
+// scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");

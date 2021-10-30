@@ -3,7 +3,8 @@ const SITES_CONFIG = {
     'mediamarkt',
     'xkom',
     'mediaexpert',
-    'rtveuroagd'
+    'rtveuroagd',
+    'morele',
   ],
 
   mediamarkt: {
@@ -31,8 +32,7 @@ const SITES_CONFIG = {
     itemBoxesSelector: '.sc-1yu46qn-4',
     itemNameSelector: '.irSQpN',
     itemPriceSelector: '.sc-6n68ef-3',
-    promotionListSelector: '.b-ofr_promoList',
-    promotionSelector: '.b-ofr_promoListItem',
+  
     pageUrl: (productSlug, priceMin, priceMax) => `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`
   },
 
@@ -60,14 +60,28 @@ const SITES_CONFIG = {
       ' ': '',
       'zł': '',
     },
-    cookieConsentSelector: '#onetrust-accept-btn-handler',
+    // cookieConsentSelector: '#onetrust-accept-btn-handler',
     itemBoxesSelector: '.product-main',
     itemNameSelector: '.product-name > a',
     itemPriceSelector: '.price-normal.selenium-price-normal',
     promotionListSelector: '.advertising-placement-listing',
     promotionSelector: '.promotion-block',
     pageUrl: (productSlug, priceMin, priceMax) => `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`
-  }
+  },
+
+  morele: {
+    name: 'morele',
+    separator: '%20',
+    priceTagFormatter: {
+      ' ': '',
+      'zł': '',
+      ',': '.',
+    },
+    itemBoxesSelector: '.cat-product-inside',
+    itemNameSelector: '.cat-product-content .productLink',
+    itemPriceSelector: '.price-new',
+    pageUrl: (productSlug, priceMin, priceMax) => `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`
+  },
 }
 
 module.exports = SITES_CONFIG;

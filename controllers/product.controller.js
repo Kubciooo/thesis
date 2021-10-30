@@ -1,10 +1,31 @@
 const Product = require("../models/product.model");
 const AppError = require("../services/error.service");
 const tryCatch = require("../utils/tryCatch.util");
+const Scrapper = require('../services/scrapper.service');
 const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
 const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
 
 const ProductController = (() => {
+
+  const getProductData = tryCatch(async (req, res, next) => {
+    /**
+     * @todo use https://express-validator.github.io/docs/index.html
+     */
+    const minPrice = req.body.minPrice;
+    const maxPrice = req.body.maxPrice;
+    const productName = req.body.productName;
+    const shops = req.body.shops;
+
+    const scrapData = await Scrapper.scrapPages(shops, parseFloat(minPrice), parseFloat(maxPrice), productName);
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        scrapData,
+      },
+    });
+  })
+
   const getAllProducts = tryCatch(async (req, res, next) => {
     const products = await Product.find(req.query);
 
@@ -49,7 +70,7 @@ const ProductController = (() => {
     });
   });
 
-  return { getAllProducts, createProduct, getProductById };
+  return { getAllProducts, createProduct, getProductById, getProductData };
 })();
 
 module.exports = ProductController;
