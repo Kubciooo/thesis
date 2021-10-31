@@ -222,5 +222,10 @@ const product = {
   shop: 'mediamarkt'
 }
 
-checkProductCoupon(product)
+const prod2 = {
+  url: 'https://www.x-kom.pl/p/654050-telewizor-60-69-samsung-qe65qn90a.html',
+  shop: 'xkom',
+  coupon: 'prezent'
+}
+checkProductCoupon(prod2)
 // scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");
