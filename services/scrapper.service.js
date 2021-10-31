@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const slugify = require('slugify');
 const getItemTextFromHTMLElement = require('../utils/getItemTextFromHTMLElement.util');
 const SITES_CONFIG = require('../constants/sites');
+const PRODUCT_ALIASES = require('../constants/productAliases');
 
 const Scrapper = (() => {
   const getSlug = (name, separator) => slugify(name, { replacement: separator, lower: true });
@@ -37,17 +38,20 @@ const Scrapper = (() => {
     return promotionsList;
   }
 
+  const getProductAlias = productName => PRODUCT_ALIASES[productName] ? PRODUCT_ALIASES[productName] : productName;
+
   const isProductSlugIncluded = (productSlug, candidateProduct, separator) => {
     const productSlugList = productSlug.split(separator);
     const candidateProductList = candidateProduct.split(separator);
 
-
     for (const slug of productSlugList) {
-      if (!candidateProductList.includes(slug)) {
+      const slugAlias = getSlug(getProductAlias(slug), separator);
+
+      if (!candidateProductList.includes(slug) && !candidateProductList.includes(slugAlias)) {
         if (!isNaN(+slug) || !candidateProductList.join('').includes(slug)) {
           let isItemIncludedAsString = false;
           for (const product of candidateProductList) {
-            if (product.includes(slug)) {
+            if (product.includes(slug) || product.includes(slugAlias)) {
               isItemIncludedAsString = true;
             }
           }
@@ -84,12 +88,15 @@ const Scrapper = (() => {
         isSinglePage = page.url() !== pageURL && shopOptions.itemSinglePageNameSelector !== undefined;
 
         if (isSinglePage) {
-          itemNameSelector = shopOptions.itemSinglePageNameSelector;
-
-          if (shopOptions.itemSinglePagePriceSelector) {
-            itemPriceSelector = shopOptions.itemSinglePagePriceSelector;
+          if((await page.$(shopOptions.itemSinglePageNameSelector))) {
+            itemNameSelector = shopOptions.itemSinglePageNameSelector;
+  
+            if (shopOptions.itemSinglePagePriceSelector) {
+              itemPriceSelector = shopOptions.itemSinglePagePriceSelector;
+            }
+          } else {
+            isSinglePage = false;
           }
-          console.log(page.url(), pageURL)
         }
 
         if (shopOptions.cookieConsentSelector) {
@@ -131,7 +138,7 @@ const Scrapper = (() => {
 
     const sortedProducts = concatenatedProductsArray.sort((a, b) => a.price - b.price);
     // console.dir(sortedProducts, { depth: null });
-    await browser.close();
+    // await browser.close();
 
     return sortedProducts;
   }
