@@ -13,12 +13,24 @@ const SITES_CONFIG = {
     priceTagFormatter: {
       ',-': '',
     },
-    itemBoxesSelector: '.m-offerBox_content',
-    itemNameSelector: '.b-ofr_headDataTitle',
-    itemPriceSelector: '.m-priceBox_price',
-    promotionListSelector: '.b-ofr_promoList',
-    promotionSelector: '.b-ofr_promoListItem',
-    pageUrl: (productSlug, priceMin, priceMax) => `https://mediamarkt.pl/search?sort=price_asc&limit=100&page=1&query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}`
+    shopSelectors: {
+      itemBoxesSelector: '.m-offerBox_content',
+      itemNameSelector: '.b-ofr_headDataTitle',
+      itemPriceSelector: '.m-priceBox_price',
+      promotionListSelector: '.b-ofr_promoList',
+      promotionSelector: '.b-ofr_promoListItem',
+      pageUrl: (productSlug, priceMin, priceMax) => `https://mediamarkt.pl/search?sort=price_asc&limit=100&page=1&query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}`
+    },
+    productSelectors: {
+      addToBasketButtonSelector: '.spark-button.add-button.is-primary.is-medium.icon-left.show-price-button',
+      additionalBasketSelectors: [
+        '.select .ui-radio .inner',
+        'label.js-discountCode_toggleTrigger'
+      ],
+      couponInputSelector: '#cart_flow_type_promo_coupon',
+      couponActivateSelector: '#js-postcode-submit',
+      priceTagSelector: '#js-cartTotal'
+    }
   },
 
   xkom: {
@@ -29,11 +41,22 @@ const SITES_CONFIG = {
       'zł': '',
       ',': '.',
     },
-    itemBoxesSelector: '.sc-1yu46qn-4',
-    itemNameSelector: '.irSQpN',
-    itemPriceSelector: '.sc-6n68ef-3',
-  
-    pageUrl: (productSlug, priceMin, priceMax) => `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`
+    shopSelectors: {
+      itemBoxesSelector: '.sc-1yu46qn-4',
+      itemNameSelector: '.irSQpN',
+      itemPriceSelector: '.sc-6n68ef-3',
+      pageUrl: (productSlug, priceMin, priceMax) => `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`
+    },
+    productSelectors: {
+      addToBasketButtonSelector: 'button[title="Dodaj do koszyka"]',
+      additionalBasketSelectors: [
+        'a.sc-1h16fat-0.sc-1v4lzt5-11.emnmDG.sc-153gokr-0.jRbixD',
+        'button.sc-15ih3hi-0.h0yxm6-2.gamchB',
+      ],
+      couponInputSelector: 'input.sc-67avig-1',
+      couponActivateSelector: 'button.sc-15ih3hi-0.sc-67avig-2.fdviAh',
+      priceTagSelector: '.pvj85d-3'
+    }
   },
 
   mediaexpert: {
@@ -44,14 +67,16 @@ const SITES_CONFIG = {
       '\nzł': '',
       '\n': '.',
     },
-    itemBoxesSelector: '#section_search-list-items .offers-list .offer-box',
-    itemNameSelector: '.name > a',
-    itemSinglePageNameSelector: '.name.is-title',
-    itemPriceSelector: '.main-price',
-    itemSinglePagePriceSelector: '.main-price',
-    promotionListSelector: '.emblems.is-desktop',
-    promotionSelector: '.emblem .content',
-    pageUrl: (productSlug, priceMin, priceMax) => `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`
+    shopSelectors: {
+      itemBoxesSelector: '#section_search-list-items .offers-list .offer-box',
+      itemNameSelector: '.name > a',
+      itemSinglePageNameSelector: '.name.is-title',
+      itemPriceSelector: '.main-price',
+      itemSinglePagePriceSelector: '.main-price',
+      promotionListSelector: '.emblems.is-desktop',
+      promotionSelector: '.emblem .content',
+      pageUrl: (productSlug, priceMin, priceMax) => `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`
+    }
   },
 
   rtveuroagd: {
@@ -62,28 +87,32 @@ const SITES_CONFIG = {
       'zł': '',
     },
     // cookieConsentSelector: '#onetrust-accept-btn-handler',
-    itemBoxesSelector: '.product-main',
-    itemNameSelector: '.product-name > a',
-    itemPriceSelector: '.price-normal.selenium-price-normal',
-    promotionListSelector: '.advertising-placement-listing',
-    promotionSelector: '.promotion-block',
-    pageUrl: (productSlug, priceMin, priceMax) => `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`
+    shopSelectors: {
+      itemBoxesSelector: '.product-main',
+      itemNameSelector: '.product-name > a',
+      itemPriceSelector: '.price-normal.selenium-price-normal',
+      promotionListSelector: '.advertising-placement-listing',
+      promotionSelector: '.promotion-block',
+      pageUrl: (productSlug, priceMin, priceMax) => `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`
+    }
   },
 
   morele: {
     name: 'morele',
     separator: '%20',
-    itemSinglePageNameSelector: '.prod-name',
     priceTagFormatter: {
       ' ': '',
       'zł': '',
       ',': '.',
     },
-    itemBoxesSelector: '.cat-product-inside',
-    itemNameSelector: '.cat-product-content .productLink',
-    itemPriceSelector: '.price-new',
-    itemSinglePagePriceSelector: '#product_price_brutto',
-    pageUrl: (productSlug, priceMin, priceMax) => `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`
+    shopSelectors: {
+      itemSinglePageNameSelector: '.prod-name',
+      itemBoxesSelector: '.cat-product-inside',
+      itemNameSelector: '.cat-product-content .productLink',
+      itemPriceSelector: '.price-new',
+      itemSinglePagePriceSelector: '#product_price_brutto',
+      pageUrl: (productSlug, priceMin, priceMax) => `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`
+    }
   },
 }
 

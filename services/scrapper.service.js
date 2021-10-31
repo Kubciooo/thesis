@@ -31,7 +31,9 @@ const Scrapper = (() => {
         if (promotion.name) {
           promotion.name = stripWhitespaces(promotion.name);
         }
-        promotionsList.push(promotion);
+        if (promotion.name || promotion.url) {
+          promotionsList.push(promotion);
+        }
       }
     }
 
@@ -62,6 +64,57 @@ const Scrapper = (() => {
     return true;
   }
 
+  const checkProductCoupon = async (product) => {
+    const browser = await puppeteer.launch(
+      {
+        headless: false
+      }
+    );
+    const page = await browser.newPage();
+    const shopOptions = SITES_CONFIG[product.shop].productSelectors;
+    const {
+      addToBasketButtonSelector,
+      additionalBasketSelectors,
+      couponInputSelector,
+      couponActivateSelector,
+      priceTagSelector
+    } = shopOptions;
+
+    page.setDefaultNavigationTimeout(60000);
+    await page.goto(product.url, { waitUntil: 'networkidle2' });
+
+    await page.waitForSelector(addToBasketButtonSelector);
+    console.log('before button selection');
+    await page.waitForSelector(addToBasketButtonSelector);
+
+    await page.$eval(addToBasketButtonSelector, el => el.click());
+    console.log('after button selector');
+
+
+    for (basketSelector of additionalBasketSelectors) {
+      await page.waitForSelector(basketSelector);
+      await page.$eval(basketSelector, el => el.click());
+    }
+    console.log('test');
+    await page.waitForSelector(couponInputSelector);
+    // const couponInput = await page.$eval(couponInputSelector, el => el.value = coupon);
+    // await page.$eval(couponInputSelector, el => el.type(product.coupon))
+    await page.type(couponInputSelector, product.coupon)
+    // await couponInput.click();
+    // await page.keyboard.type(product.coupon);
+
+    const priceTagBefore = await page.$eval(priceTagSelector, el => el.innerText);
+    await page.$eval(couponActivateSelector, el => el.click());
+
+    await page.waitForSelector('body');
+    await page.waitForSelector(priceTagSelector);
+    const priceTagAfter = await page.$eval(priceTagSelector, el => el.innerTxext);
+
+    console.log(`before: ${priceTagBefore}, after: ${priceTagAfter}`);
+
+    // await browser.close();
+  }
+
   const scrapPages = async (shops, priceMin, priceMax, productName) => {
     const browser = await puppeteer.launch(
       {
@@ -74,8 +127,10 @@ const Scrapper = (() => {
       const page = await browser.newPage();
       page.setDefaultNavigationTimeout(60000);
 
-      const shopOptions = SITES_CONFIG[shopName];
-      const productSlug = getSlug(productName, shopOptions.separator);
+      const shopOptions = SITES_CONFIG[shopName].shopSelectors;
+      const separator = SITES_CONFIG[shopName].separator;
+      const priceTagFormatter = SITES_CONFIG[shopName].priceTagFormatter;
+      const productSlug = getSlug(productName, separator);
       let itemNameSelector = shopOptions.itemNameSelector; // some webpages redirect to the item page if no other items exist
       let itemPriceSelector = shopOptions.itemPriceSelector; // some webpages redirect to the item page if no other items exist
       let isSinglePage = false;
@@ -88,9 +143,9 @@ const Scrapper = (() => {
         isSinglePage = page.url() !== pageURL && shopOptions.itemSinglePageNameSelector !== undefined;
 
         if (isSinglePage) {
-          if((await page.$(shopOptions.itemSinglePageNameSelector))) {
+          if ((await page.$(shopOptions.itemSinglePageNameSelector))) {
             itemNameSelector = shopOptions.itemSinglePageNameSelector;
-  
+
             if (shopOptions.itemSinglePagePriceSelector) {
               itemPriceSelector = shopOptions.itemSinglePagePriceSelector;
             }
@@ -99,10 +154,6 @@ const Scrapper = (() => {
           }
         }
 
-        if (shopOptions.cookieConsentSelector) {
-          await page.$eval(shopOptions.cookieConsentSelector, btn => btn.click());
-          await page.waitForSelector('body');
-        }
         const itemBoxes = isSinglePage ? [page] : await page.$$(shopOptions.itemBoxesSelector);
 
         for (const item of itemBoxes) {
@@ -110,10 +161,10 @@ const Scrapper = (() => {
           name = stripWhitespaces(name);
 
           const priceTag = await getItemTextFromHTMLElement(item, itemPriceSelector);
-          const nameSlug = getSlug(name, shopOptions.separator);
+          const nameSlug = getSlug(name, separator);
 
-          if (priceTag && isProductSlugIncluded(productSlug, nameSlug, shopOptions.separator)) {
-            const price = parseFloat(formatString(priceTag, shopOptions.priceTagFormatter));
+          if (priceTag && isProductSlugIncluded(productSlug, nameSlug, separator)) {
+            const price = parseFloat(formatString(priceTag, priceTagFormatter));
 
             const url = isSinglePage ? page.url() : await item.$eval(itemNameSelector, el => el.href);
             const promotions = shopOptions.promotionListSelector ? await getPromotionsListForSingleItem(page, item, shopOptions.promotionListSelector, shopOptions.promotionSelector) : [];
@@ -143,10 +194,20 @@ const Scrapper = (() => {
     return sortedProducts;
   }
 
-  return { scrapPages };
+  return { scrapPages, checkProductCoupon };
 
 })();
 
 module.exports = Scrapper;
 // const { scrapPages } = Scrapper;
+
+const { checkProductCoupon } = Scrapper;
+
+const product = {
+  url: 'https://mediamarkt.pl/rtv-i-telewizory/telewizor-samsung-ue75au8002k',
+  coupon: '50za500KLUB',
+  shop: 'mediamarkt'
+}
+
+checkProductCoupon(product)
 // scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");

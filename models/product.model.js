@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 
 const productSchema = mongoose.Schema({
+  // name, category (ewentualnie), shop_id, url
   name: {
     type: String,
     maxlength: [40, "The name must have at most 40 characters"],
