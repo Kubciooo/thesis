@@ -28,7 +28,7 @@ const SITES_CONFIG = {
         'label.js-discountCode_toggleTrigger'
       ],
       couponInputSelector: '#cart_flow_type_promo_coupon',
-      couponActivateSelector: '#js-postcode-submit',
+      couponActivateSelector: '#js-promo-submit',
       priceTagSelector: '#js-cartTotal'
     }
   },

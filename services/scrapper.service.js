@@ -92,6 +92,7 @@ const Scrapper = (() => {
 
 
     for (basketSelector of additionalBasketSelectors) {
+      await new Promise((r) => setTimeout(r, 5000));
       await page.waitForSelector(basketSelector);
       await page.$eval(basketSelector, el => el.click());
     }
@@ -99,20 +100,32 @@ const Scrapper = (() => {
     await page.waitForSelector(couponInputSelector);
     // const couponInput = await page.$eval(couponInputSelector, el => el.value = coupon);
     // await page.$eval(couponInputSelector, el => el.type(product.coupon))
-    await page.type(couponInputSelector, product.coupon)
-    // await couponInput.click();
-    // await page.keyboard.type(product.coupon);
+    await new Promise((r) => setTimeout(r, 3000));
+    console.log('pressing!');
+    const couponInput = await page.$(couponInputSelector);
+    await couponInput.press('Backspace');
+    await couponInput.type(product.coupon);
+    await new Promise((r) => setTimeout(r, 5000));
 
-    const priceTagBefore = await page.$eval(priceTagSelector, el => el.innerText);
-    await page.$eval(couponActivateSelector, el => el.click());
+    const priceTag = await page.$(priceTagSelector);
+    const priceTagBefore = await priceTag.evaluate(price => price.innerText);
+    await new Promise((r) => setTimeout(r, 5000));
 
+    console.log('clicking!')
+    await page.$eval(couponActivateSelector, el => el.click(), { waitUntil: 'domcontentloaded' }),
+    
     await page.waitForSelector('body');
     await page.waitForSelector(priceTagSelector);
-    const priceTagAfter = await page.$eval(priceTagSelector, el => el.innerTxext);
+
+    await new Promise((r) => setTimeout(r, 7000));
+    await page.waitForSelector(priceTagSelector);
+
+
+    const priceTagAfter = await page.$eval(priceTagSelector, price => price.innerText);
 
     console.log(`before: ${priceTagBefore}, after: ${priceTagAfter}`);
 
-    // await browser.close();
+    await browser.close();
   }
 
   const scrapPages = async (shops, priceMin, priceMax, productName) => {
@@ -204,7 +217,7 @@ module.exports = Scrapper;
 const { checkProductCoupon } = Scrapper;
 
 const product = {
-  url: 'https://mediamarkt.pl/rtv-i-telewizory/telewizor-samsung-ue75au8002k',
+  url: 'https://mediamarkt.pl/telefony-i-smartfony/smartfon-samsung-galaxy-a52s-5g-6gb-128gb-czarny-sm-a528bzkdeue',
   coupon: '50za500KLUB',
   shop: 'mediamarkt'
 }
