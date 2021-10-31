@@ -48,6 +48,7 @@ const SITES_CONFIG = {
     itemNameSelector: '.name > a',
     itemSinglePageNameSelector: '.name.is-title',
     itemPriceSelector: '.main-price',
+    itemSinglePagePriceSelector: '.main-price',
     promotionListSelector: '.emblems.is-desktop',
     promotionSelector: '.emblem .content',
     pageUrl: (productSlug, priceMin, priceMax) => `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`
@@ -72,6 +73,7 @@ const SITES_CONFIG = {
   morele: {
     name: 'morele',
     separator: '%20',
+    itemSinglePageNameSelector: '.prod-name',
     priceTagFormatter: {
       ' ': '',
       'zł': '',
@@ -80,6 +82,7 @@ const SITES_CONFIG = {
     itemBoxesSelector: '.cat-product-inside',
     itemNameSelector: '.cat-product-content .productLink',
     itemPriceSelector: '.price-new',
+    itemSinglePagePriceSelector: '#product_price_brutto',
     pageUrl: (productSlug, priceMin, priceMax) => `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`
   },
 }

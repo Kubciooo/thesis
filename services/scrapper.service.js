@@ -27,7 +27,7 @@ const Scrapper = (() => {
       for (const promotionElement of promotionElements) {
         const promotion = await page.evaluate(el => ({ name: el.innerText, url: el.href }), promotionElement);
 
-        if(promotion.name) {
+        if (promotion.name) {
           promotion.name = stripWhitespaces(promotion.name);
         }
         promotionsList.push(promotion);
@@ -67,6 +67,7 @@ const Scrapper = (() => {
       const shopOptions = SITES_CONFIG[shopName];
       const productSlug = getSlug(productName, shopOptions.separator);
       let itemNameSelector = shopOptions.itemNameSelector; // some webpages redirect to the item page if no other items exist
+      let itemPriceSelector = shopOptions.itemPriceSelector; // some webpages redirect to the item page if no other items exist
       let isSinglePage = false;
       const pageURL = shopOptions.pageUrl(productSlug, priceMin, priceMax);
 
@@ -74,10 +75,15 @@ const Scrapper = (() => {
         await page.goto(pageURL, { waitUntil: 'networkidle2' });
 
         await page.waitForSelector('body');
-        isSinglePage = page.url() !== pageURL;
+        isSinglePage = page.url() !== pageURL && shopOptions.itemSinglePageNameSelector !== undefined;
 
         if (isSinglePage) {
           itemNameSelector = shopOptions.itemSinglePageNameSelector;
+
+          if (shopOptions.itemSinglePagePriceSelector) {
+            itemPriceSelector = shopOptions.itemSinglePagePriceSelector;
+          }
+          console.log(page.url(), pageURL)
         }
 
         if (shopOptions.cookieConsentSelector) {
@@ -90,7 +96,7 @@ const Scrapper = (() => {
           let name = await getItemTextFromHTMLElement(item, itemNameSelector);
           name = stripWhitespaces(name);
 
-          const priceTag = await getItemTextFromHTMLElement(item, shopOptions.itemPriceSelector);
+          const priceTag = await getItemTextFromHTMLElement(item, itemPriceSelector);
           const nameSlug = getSlug(name, shopOptions.separator);
 
           if (priceTag && isProductSlugIncluded(productSlug, nameSlug, shopOptions.separator)) {
