@@ -44,8 +44,14 @@ const Scrapper = (() => {
 
     for (const slug of productSlugList) {
       if (!candidateProductList.includes(slug)) {
-        if (!isNaN(+slug) || !candidateProduct.includes(slug)) {
-          return false;
+        if (!isNaN(+slug) || !candidateProductList.join('').includes(slug)) {
+          let isItemIncludedAsString = false;
+          for (const product of candidateProductList) {
+            if (product.includes(slug)) {
+              isItemIncludedAsString = true;
+            }
+          }
+          if (!isItemIncludedAsString) return false;
         }
       }
     }
