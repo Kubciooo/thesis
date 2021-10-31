@@ -138,7 +138,7 @@ const Scrapper = (() => {
 
     const sortedProducts = concatenatedProductsArray.sort((a, b) => a.price - b.price);
     // console.dir(sortedProducts, { depth: null });
-    // await browser.close();
+    await browser.close();
 
     return sortedProducts;
   }
