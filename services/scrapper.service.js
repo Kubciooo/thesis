@@ -1,14 +1,25 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
 const slugify = require('slugify');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
 const getItemTextFromHTMLElement = require('../utils/getItemTextFromHTMLElement.util');
 const SITES_CONFIG = require('../constants/sites');
 const PRODUCT_ALIASES = require('../constants/productAliases');
 const AppError = require('./error.service');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 
+puppeteer.use(StealthPlugin());
+puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
+
 const Scrapper = (() => {
+  const waitRandomTime = async (page, time) => {
+    const timeFrom = time;
+    const timeTo = time * 1.5;
+    await page.waitForTimeout(Math.floor(Math.random() * timeTo) + timeFrom);
+  };
+
   const getSlug = (name, separator) =>
     slugify(name, { replacement: separator, lower: true });
 
@@ -86,10 +97,21 @@ const Scrapper = (() => {
   const checkProductCoupon = async (product) => {
     const browser = await puppeteer.launch({
       headless: false,
-      args: ['--window-size=1200,800'],
+      ignoreHTTPSErrors: true,
+      slowMo: 0,
+      args: [
+        '--window-size=1400,900',
+        '--remote-debugging-port=9222',
+        '--remote-debugging-address=0.0.0.0', // You know what your doing?
+        '--disable-gpu',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--blink-settings=imagesEnabled=true',
+      ],
     });
     const page = await browser.newPage();
     const shopOptions = SITES_CONFIG[product.shop].productSelectors;
+    const actionDelay = SITES_CONFIG[product.shop].actionsDelay;
+
     const {
       addToBasketButtonSelector,
       additionalBasketSelectors,
@@ -106,47 +128,40 @@ const Scrapper = (() => {
     await page.goto(product.url, { waitUntil: 'networkidle2' });
 
     await page.waitForSelector('body');
-    console.log('before button selection');
+
     await page.waitForSelector(addToBasketButtonSelector);
-    await new Promise((r) => setTimeout(r, 3000));
+    await waitRandomTime(page, actionDelay);
 
     const btn = await page.$(addToBasketButtonSelector);
-    console.log(btn);
 
     await btn.evaluate((el) => el.click());
-    console.log('after button selector');
 
     for (const basketSelector of additionalBasketSelectors) {
-      await new Promise((r) => setTimeout(r, 7000));
+      await waitRandomTime(page, actionDelay);
       await page.waitForSelector(basketSelector);
-      console.log(basketSelector);
       await page.$eval(basketSelector, (el) => el.click());
     }
-    console.log('test');
+
     await page.waitForSelector(couponInputSelector);
-    // const couponInput = await page.$eval(couponInputSelector, el => el.value = coupon);
-    // await page.$eval(couponInputSelector, el => el.type(product.coupon))
-    await new Promise((r) => setTimeout(r, 3000));
-    console.log('pressing!');
+    await waitRandomTime(page, actionDelay);
+
     const couponInput = await page.$(couponInputSelector);
+
     await couponInput.click();
     await couponInput.press('Backspace');
-    await couponInput.type(product.coupon);
-    await new Promise((r) => setTimeout(r, 5000));
+    await couponInput.type(product.coupon, { delay: 10 });
+    await waitRandomTime(page, actionDelay);
 
     const priceTag = await page.$(priceTagSelector);
     const priceTagBefore = await priceTag.evaluate((price) => price.innerText);
-    await new Promise((r) => setTimeout(r, 5000));
+    await waitRandomTime(page, actionDelay);
 
-    console.log('clicking!');
     await page.$eval(couponActivateSelector, (el) => el.click(), {
       waitUntil: 'domcontentloaded',
     });
     await page.waitForSelector('body');
     await page.waitForSelector(priceTagSelector);
-
-    await new Promise((r) => setTimeout(r, 5000));
-    await page.waitForSelector(priceTagSelector);
+    await page.waitForTimeout(5 * actionDelay);
 
     const priceTagAfter = await page.$eval(
       priceTagSelector,
@@ -276,30 +291,30 @@ module.exports = Scrapper;
 
 const { checkProductCoupon } = Scrapper;
 
-// const product = {
-//   url: 'https://mediamarkt.pl/telefony-i-smartfony/smartfon-samsung-galaxy-a52s-5g-6gb-128gb-czarny-sm-a528bzkdeue',
-//   coupon: '50za500KLUB',
-//   shop: 'mediamarkt'
-// }
+const product = {
+  url: 'https://mediamarkt.pl/telefony-i-smartfony/smartfon-samsung-galaxy-a52s-5g-6gb-128gb-czarny-sm-a528bzkdeue',
+  coupon: '50za500KLUB',
+  shop: 'mediamarkt',
+};
 
-// const prod2 = {
-//   url: 'https://www.x-kom.pl/p/654050-telewizor-60-69-samsung-qe65qn90a.html',
-//   shop: 'xkom',
-//   coupon: 'prezent'
-// }
+const prod2 = {
+  url: 'https://www.x-kom.pl/p/654050-telewizor-60-69-samsung-qe65qn90a.html',
+  shop: 'xkom',
+  coupon: 'prezent',
+};
 
-// const prod3 = {
-//   url: 'https://www.mediaexpert.pl/agd-do-zabudowy/piekarniki-do-zabudowy/piekarnik-amica-ed37219x-x-type',
-//   shop: 'mediaexpert',
-//   coupon: 'HALLOWEEN'
-// }
-// const prod4 = {
-//   url: 'https://www.euro.com.pl/telewizory-led-lcd-plazmowe/panasonic-tx-55hz1000e-tv-oled.bhtml',
-//   shop: 'rtveuroagd',
-//   coupon: 'HD011121'
-// }
+const prod3 = {
+  url: 'https://www.mediaexpert.pl/agd-do-zabudowy/piekarniki-do-zabudowy/piekarnik-amica-ed37219x-x-type',
+  shop: 'mediaexpert',
+  coupon: 'HALLOWEEN',
+};
+const prod4 = {
+  url: 'https://www.euro.com.pl/telewizory-led-lcd-plazmowe/panasonic-tx-55hz1000e-tv-oled.bhtml',
+  shop: 'rtveuroagd',
+  coupon: 'HD011121',
+};
 const prod5 = {
-  url: 'https://www.morele.net/klawiatura-corsair-k70-rgb-mk-2-low-profile-ch-9109018-na-5615766/?_gl=1*1eioavc*_ga*NDMyNzg3MDAzLjE2MzU2MTE0OTI.*_ga_Z6RQKBMET4*MTYzNTc2MTUzMC40LjEuMTYzNTc2MTU1MS4zOQ..&_ga=2.15483702.1420137474.1635611492-432787003.1635611492',
+  url: 'https://www.morele.net/sluchawki-corsair-hs70-pro-wireless-ca-9011210-eu-6324974/',
   shop: 'morele',
   coupon: 'CORS21',
 };

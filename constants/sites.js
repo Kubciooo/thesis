@@ -3,6 +3,7 @@ const SITES_CONFIG = {
 
   mediamarkt: {
     name: 'mediamarkt',
+    actionsDelay: 7000,
     separator: '+',
     priceTagFormatter: {
       ',-': '',
@@ -31,6 +32,7 @@ const SITES_CONFIG = {
 
   xkom: {
     name: 'xkom',
+    actionsDelay: 2000,
     separator: '%20',
     priceTagFormatter: {
       ' ': '',
@@ -58,6 +60,7 @@ const SITES_CONFIG = {
 
   mediaexpert: {
     name: 'mediaexpert',
+    actionsDelay: 2000,
     separator: '%20',
     priceTagFormatter: {
       ' ': '',
@@ -90,6 +93,7 @@ const SITES_CONFIG = {
   rtveuroagd: {
     name: 'rtveuroagd',
     separator: '%20',
+    actionsDelay: 2000,
     priceTagFormatter: {
       ' ': '',
       zł: '',
@@ -120,6 +124,7 @@ const SITES_CONFIG = {
 
   morele: {
     name: 'morele',
+    actionsDelay: 1000,
     separator: '%20',
     priceTagFormatter: {
       ' ': '',
