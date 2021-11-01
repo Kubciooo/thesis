@@ -133,7 +133,18 @@ const SITES_CONFIG = {
       itemPriceSelector: '.price-new',
       itemSinglePagePriceSelector: '#product_price_brutto',
       pageUrl: (productSlug, priceMin, priceMax) => `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`
-    }
+    },
+    productSelectors: {
+      addToBasketButtonSelector: '.add-to-cart__btn',
+      additionalBasketSelectors: [
+        '.js_no-warrant-btn',
+        '.show-basket',
+        '.discount.change-to-input'
+      ],
+      couponInputSelector: 'input[name="discount"]',
+      couponActivateSelector: '#promoCodeBtn',
+      priceTagSelector: '.summary-box-price b'
+    },
   },
 }
 

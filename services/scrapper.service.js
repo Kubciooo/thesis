@@ -249,5 +249,11 @@ const prod4 = {
   shop: 'rtveuroagd',
   coupon: 'HD011121'
 }
-checkProductCoupon(prod4)
+const prod5 = {
+  url: 'https://www.morele.net/klawiatura-corsair-k70-rgb-mk-2-low-profile-ch-9109018-na-5615766/?_gl=1*1eioavc*_ga*NDMyNzg3MDAzLjE2MzU2MTE0OTI.*_ga_Z6RQKBMET4*MTYzNTc2MTUzMC40LjEuMTYzNTc2MTU1MS4zOQ..&_ga=2.15483702.1420137474.1635611492-432787003.1635611492',
+  shop: 'morele',
+  coupon: 'CORS21'
+}
+
+checkProductCoupon(prod5)
 // scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");
