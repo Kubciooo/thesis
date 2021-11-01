@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 const productSchema = mongoose.Schema({
   // name, category (ewentualnie), shop_id, url
   name: {
     type: String,
-    maxlength: [40, "The name must have at most 40 characters"],
+    maxlength: [40, 'The name must have at most 40 characters'],
     required: true,
     unique: true,
     index: true,
@@ -13,14 +13,14 @@ const productSchema = mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
+    ref: 'Category',
     required: true,
   },
   prices: [
     {
       shop: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Shop",
+        ref: 'Shop',
         required: true,
       },
       url: {
@@ -37,6 +37,6 @@ const productSchema = mongoose.Schema({
   ],
 });
 
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;

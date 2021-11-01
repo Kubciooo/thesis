@@ -1,13 +1,13 @@
-const AppError = require("../services/error.service");
-const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
-const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
+const AppError = require('../services/error.service');
+const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
+const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 
 const ErrorController = (() => {
   const handleDuplicates = (err) => {
     const fieldValue = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
     const message = `The value ${fieldValue} already exists in DB - please use other value`;
     const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
-    const name = "Unique Duplicates Error";
+    const name = 'Unique Duplicates Error';
     const isOperational = true;
     return new AppError(name, statusCode, message, isOperational);
   };
@@ -15,16 +15,16 @@ const ErrorController = (() => {
   const handleCastError = (err) => {
     const message = `Invalid ${err.path}: ${err.value}.`;
     const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
-    const name = "Cast Error";
+    const name = 'Cast Error';
     const isOperational = true;
     return new AppError(name, statusCode, message, isOperational);
   };
 
   const handleValidationError = (err) => {
     const errors = Object.values(err.errors).map((el) => el.message);
-    const message = `Invalid input data. ${errors.join(". ")}`;
+    const message = `Invalid input data. ${errors.join('. ')}`;
     const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
-    const name = "Validation Error";
+    const name = 'Validation Error';
     const isOperational = true;
     return new AppError(name, statusCode, message, isOperational);
   };
@@ -32,7 +32,7 @@ const ErrorController = (() => {
   const handleJWTInvalidError = () => {
     const message = `Invalid JWT token`;
     const statusCode = HTTP_STATUS_CODES.INVALID;
-    const name = "JsonWebToken Error";
+    const name = 'JsonWebToken Error';
     const isOperational = true;
     return new AppError(name, statusCode, message, isOperational);
   };
@@ -40,15 +40,15 @@ const ErrorController = (() => {
   const handleJWTExpiredError = () => {
     const message = `Expired JWT token`;
     const statusCode = HTTP_STATUS_CODES.INVALID;
-    const name = "Token Expired Error";
+    const name = 'Token Expired Error';
     const isOperational = true;
     return new AppError(name, statusCode, message, isOperational);
   };
 
   const handleOtherError = (err) => {
-    const message = err.message;
+    const { message } = err;
     const statusCode = err.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER;
-    const name = err.name;
+    const { name } = err;
     const isOperational = false;
     return new AppError(name, statusCode, message, isOperational);
   };
@@ -65,13 +65,13 @@ const ErrorController = (() => {
   const findError = (err) => {
     if (err.code === 11000) return handleDuplicates(err);
     switch (err.name) {
-      case "CastError":
+      case 'CastError':
         return handleCastError(err);
-      case "ValidationError":
+      case 'ValidationError':
         return handleValidationError(err);
-      case "JsonWebTokenError":
+      case 'JsonWebTokenError':
         return handleJWTInvalidError();
-      case "TokenExpiredError":
+      case 'TokenExpiredError':
         return handleJWTExpiredError();
       default:
         return handleOtherError(err);

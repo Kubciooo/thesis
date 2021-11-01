@@ -1,21 +1,21 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const User = require("../models/user.model");
-const AppError = require("../services/error.service");
-const tryCatch = require("../utils/tryCatch.util");
-const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
-const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
-const variables = require("../constants/variables");
-const Emails = require("../utils/emails.util");
+const User = require('../models/user.model');
+const AppError = require('../services/error.service');
+const tryCatch = require('../utils/tryCatch.util');
+const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
+const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
+const variables = require('../constants/variables');
+const Emails = require('../utils/emails.util');
 
 const UserController = (() => {
   const signup = tryCatch(async (req, res, next) => {
     if (req.body.password !== req.body.retypePassword) {
       return next(
         new AppError(
-          "PasswordsAreSameError",
+          'PasswordsAreSameError',
           HTTP_STATUS_CODES.FORBIDDEN,
-          "Passwords are not the same",
+          'Passwords are not the same',
           true
         )
       );
@@ -48,7 +48,7 @@ const UserController = (() => {
 
   const login = tryCatch(async (req, res, next) => {
     const user = await User.findOne({ login: req.body.login }).select(
-      "+password"
+      '+password'
     );
     const isUserValidated =
       user && (await user.validatePassword(req.body.password));
@@ -56,9 +56,9 @@ const UserController = (() => {
     if (!isUserValidated) {
       return next(
         new AppError(
-          "InvalidUser",
+          'InvalidUser',
           HTTP_STATUS_CODES.NOT_FOUND,
-          "Wrong login or password",
+          'Wrong login or password',
           true
         )
       );
@@ -86,9 +86,9 @@ const UserController = (() => {
     if (!user) {
       return next(
         new AppError(
-          "InvalidUser",
+          'InvalidUser',
           HTTP_STATUS_CODES.NOT_FOUND,
-          "Wrong login",
+          'Wrong login',
           true
         )
       );
@@ -115,14 +115,16 @@ const UserController = (() => {
 
   const updatePassword = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).select('+password');
-    const isUserValidated = await user.validatePassword(req.body.currentPassword);
+    const isUserValidated = await user.validatePassword(
+      req.body.currentPassword
+    );
 
     if (!isUserValidated) {
       return next(
         new AppError(
-          "InvalidUser",
+          'InvalidUser',
           HTTP_STATUS_CODES.NOT_FOUND,
-          "Wrong password",
+          'Wrong password',
           true
         )
       );
@@ -138,7 +140,7 @@ const UserController = (() => {
         expiresIn: variables.jwtSecret.expiresIn[process.env.NODE_ENV],
       }
     );
-    
+
     req.user = user;
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
@@ -148,29 +150,36 @@ const UserController = (() => {
         user,
       },
     });
-
-
-  })
+  });
 
   const resetPassword = tryCatch(async (req, res, next) => {
     const resetToken = req.params.token;
-    const hashedToken = crypto.createHash('sha512').update(resetToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha512')
+      .update(resetToken)
+      .digest('hex');
 
     const user = await User.findOne({
       passwordForgotToken: hashedToken,
-      passwordForgotTokenExpiration: { $gt: Date.now() }
-    })
+      passwordForgotTokenExpiration: { $gt: Date.now() },
+    });
 
     if (!user) {
-      return next(new AppError('NotFoundError', HTTP_STATUS_CODES.NOT_FOUND, 'Invalid or expired token'));
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          'Invalid or expired token'
+        )
+      );
     }
 
     if (req.body.password !== req.body.retypePassword) {
       return next(
         new AppError(
-          "PasswordsAreSameError",
+          'PasswordsAreSameError',
           HTTP_STATUS_CODES.FORBIDDEN,
-          "Passwords are not the same",
+          'Passwords are not the same',
           true
         )
       );
@@ -196,8 +205,7 @@ const UserController = (() => {
         user,
       },
     });
-  })
-
+  });
 
   return { signup, login, forgotPassword, resetPassword, updatePassword };
 })();

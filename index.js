@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const { database } = require('./constants/variables');
 
-dotenv.config({ path: "./config.env" });
-const app = require("./app");
+dotenv.config({ path: './config.env' });
+const app = require('./app');
 
 const DB = database[process.env.NODE_ENV || 'development'];
 
@@ -12,7 +12,7 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("DB connection successful"));
+  .then(() => console.log('DB connection successful'));
 
 const port = process.env.PORT || 8080;
 

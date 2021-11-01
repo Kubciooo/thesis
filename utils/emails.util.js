@@ -4,10 +4,14 @@ const variables = require('../constants/variables');
 const AppError = require('../services/error.service');
 
 const Emails = (() => {
-  const transporter = nodemailer.createTransport({ ...variables.transporter[process.env.NODE_ENV] });
+  const transporter = nodemailer.createTransport({
+    ...variables.transporter[process.env.NODE_ENV],
+  });
 
   const send = async (userEmail, userForgotToken) => {
-    const forgotPasswordRoute = `https://${variables.apiUrl[process.env.NODE_ENV]}/api/users/resetPassword/${userForgotToken}`;
+    const forgotPasswordRoute = `https://${
+      variables.apiUrl[process.env.NODE_ENV]
+    }/api/users/resetPassword/${userForgotToken}`;
     const mailOptions = {
       from: 'pawel@offprice.com',
       to: userEmail,
@@ -15,12 +19,16 @@ const Emails = (() => {
       text: `Forgot your password? No worries, we got you! To restart your password, just send a POST request to ${forgotPasswordRoute}`,
     };
 
-    await transporter.sendMail(mailOptions, (err, info) => {
+    await transporter.sendMail(mailOptions, (err) => {
       if (err) {
-        throw new AppError('EmailNotSentError', HTTP_STATUS_CODES.INTERNAL_SERVER, "Couldn't send an email! Try again later!");
+        throw new AppError(
+          'EmailNotSentError',
+          HTTP_STATUS_CODES.INTERNAL_SERVER,
+          "Couldn't send an email! Try again later!"
+        );
       }
     });
-  }
+  };
 
   return { send };
 })();

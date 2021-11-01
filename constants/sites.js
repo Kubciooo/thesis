@@ -1,11 +1,5 @@
 const SITES_CONFIG = {
-  names: [
-    'mediamarkt',
-    'xkom',
-    'mediaexpert',
-    'rtveuroagd',
-    'morele',
-  ],
+  names: ['mediamarkt', 'xkom', 'mediaexpert', 'rtveuroagd', 'morele'],
 
   mediamarkt: {
     name: 'mediamarkt',
@@ -19,18 +13,20 @@ const SITES_CONFIG = {
       itemPriceSelector: '.m-priceBox_price',
       promotionListSelector: '.b-ofr_promoList',
       promotionSelector: '.b-ofr_promoListItem',
-      pageUrl: (productSlug, priceMin, priceMax) => `https://mediamarkt.pl/search?sort=price_asc&limit=100&page=1&query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}`
+      pageUrl: (productSlug, priceMin, priceMax) =>
+        `https://mediamarkt.pl/search?sort=price_asc&limit=100&page=1&query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}`,
     },
     productSelectors: {
-      addToBasketButtonSelector: '.spark-button.add-button.is-primary.is-medium.icon-left.show-price-button',
+      addToBasketButtonSelector:
+        '.spark-button.add-button.is-primary.is-medium.icon-left.show-price-button',
       additionalBasketSelectors: [
         '.select .ui-radio .inner',
-        'label.js-discountCode_toggleTrigger'
+        'label.js-discountCode_toggleTrigger',
       ],
       couponInputSelector: '#cart_flow_type_promo_coupon',
       couponActivateSelector: '#js-promo-submit',
-      priceTagSelector: '#js-cartTotal'
-    }
+      priceTagSelector: '#js-cartTotal',
+    },
   },
 
   xkom: {
@@ -38,14 +34,15 @@ const SITES_CONFIG = {
     separator: '%20',
     priceTagFormatter: {
       ' ': '',
-      'zł': '',
+      zł: '',
       ',': '.',
     },
     shopSelectors: {
       itemBoxesSelector: '.sc-1yu46qn-4',
       itemNameSelector: '.irSQpN',
       itemPriceSelector: '.sc-6n68ef-3',
-      pageUrl: (productSlug, priceMin, priceMax) => `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`
+      pageUrl: (productSlug, priceMin, priceMax) =>
+        `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`,
     },
     productSelectors: {
       addToBasketButtonSelector: 'button[title="Dodaj do koszyka"]',
@@ -55,8 +52,8 @@ const SITES_CONFIG = {
       ],
       couponInputSelector: 'input.sc-67avig-1',
       couponActivateSelector: 'button.sc-15ih3hi-0.sc-67avig-2.fdviAh',
-      priceTagSelector: '.pvj85d-3'
-    }
+      priceTagSelector: '.pvj85d-3',
+    },
   },
 
   mediaexpert: {
@@ -75,7 +72,8 @@ const SITES_CONFIG = {
       itemSinglePagePriceSelector: '.main-price',
       promotionListSelector: '.emblems.is-desktop',
       promotionSelector: '.emblem .content',
-      pageUrl: (productSlug, priceMin, priceMax) => `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`
+      pageUrl: (productSlug, priceMin, priceMax) =>
+        `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`,
     },
     productSelectors: {
       addToBasketButtonSelector: '.add-to-cart',
@@ -83,8 +81,9 @@ const SITES_CONFIG = {
         '.precart-main.has-background .close .icon.icon-x02',
       ],
       couponInputSelector: 'input[placeholder="Kod rabatowy"]',
-      couponActivateSelector: '.spark-button.submit.is-secondary.is-default.icon-left',
-      priceTagSelector: '.price.is-little'
+      couponActivateSelector:
+        '.spark-button.submit.is-secondary.is-default.icon-left',
+      priceTagSelector: '.price.is-little',
     },
   },
 
@@ -93,7 +92,7 @@ const SITES_CONFIG = {
     separator: '%20',
     priceTagFormatter: {
       ' ': '',
-      'zł': '',
+      zł: '',
     },
     // cookieConsentSelector: '#onetrust-accept-btn-handler',
     shopSelectors: {
@@ -102,7 +101,8 @@ const SITES_CONFIG = {
       itemPriceSelector: '.price-normal.selenium-price-normal',
       promotionListSelector: '.advertising-placement-listing',
       promotionSelector: '.promotion-block',
-      pageUrl: (productSlug, priceMin, priceMax) => `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`
+      pageUrl: (productSlug, priceMin, priceMax) =>
+        `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`,
     },
     productSelectors: {
       addToBasketButtonSelector: '.add-product-to-cart',
@@ -110,11 +110,11 @@ const SITES_CONFIG = {
         '#onetrust-accept-btn-handler',
         '#warranty-encouragement > button',
         '.go-to-basket',
-        'button[title="Usuń kod rabatowy"]'
+        'button[title="Usuń kod rabatowy"]',
       ],
       couponInputSelector: '#voucherInput',
       couponActivateSelector: 'button[title="Zastosuj kod rabatowy"]',
-      priceTagSelector: '.summary-value.selenium-O-total-price'
+      priceTagSelector: '.summary-value.selenium-O-total-price',
     },
   },
 
@@ -123,7 +123,7 @@ const SITES_CONFIG = {
     separator: '%20',
     priceTagFormatter: {
       ' ': '',
-      'zł': '',
+      zł: '',
       ',': '.',
     },
     shopSelectors: {
@@ -132,20 +132,21 @@ const SITES_CONFIG = {
       itemNameSelector: '.cat-product-content .productLink',
       itemPriceSelector: '.price-new',
       itemSinglePagePriceSelector: '#product_price_brutto',
-      pageUrl: (productSlug, priceMin, priceMax) => `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`
+      pageUrl: (productSlug, priceMin, priceMax) =>
+        `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`,
     },
     productSelectors: {
       addToBasketButtonSelector: '.add-to-cart__btn',
       additionalBasketSelectors: [
         '.js_no-warrant-btn',
         '.show-basket',
-        '.discount.change-to-input'
+        '.discount.change-to-input',
       ],
       couponInputSelector: 'input[name="discount"]',
       couponActivateSelector: '#promoCodeBtn',
-      priceTagSelector: '.summary-box-price b'
+      priceTagSelector: '.summary-box-price b',
     },
   },
-}
+};
 
 module.exports = SITES_CONFIG;

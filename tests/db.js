@@ -1,5 +1,8 @@
-const mongoose = require("mongoose");
-const { MongoMemoryServer } = require("mongodb-memory-server");
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable guard-for-in */
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongo;
 
@@ -32,16 +35,16 @@ module.exports.closeDatabase = async () => {
  * @param {String} name - name of collection
  */
 module.exports.clearCollection = async (name) => {
-  const collections = mongoose.connection.collections;
+  const { collections } = mongoose.connection;
   if (collections[name]) {
     await collections[name].deleteMany({});
   } else {
-    console.error("Wrong collection name!");
+    console.error('Wrong collection name!');
   }
 };
 
 module.exports.clearDatabase = async () => {
-  const collections = mongoose.connection.collections;
+  const { collections } = mongoose.connection;
 
   for (const key in collections) {
     const collection = collections[key];

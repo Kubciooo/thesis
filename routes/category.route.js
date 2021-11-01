@@ -1,13 +1,13 @@
-const express = require("express");
-const CategoryController = require("../controllers/category.controller");
+const express = require('express');
+const CategoryController = require('../controllers/category.controller');
 
 const categoryRouter = express.Router();
 
 categoryRouter
-  .route("/")
+  .route('/')
   .get(CategoryController.getAllCategories)
   .post(CategoryController.createCategory);
 
-categoryRouter.route("/:id").get(CategoryController.getCategoryById);
+categoryRouter.route('/:id').get(CategoryController.getCategoryById);
 
 module.exports = categoryRouter;

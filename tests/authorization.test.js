@@ -1,25 +1,29 @@
-const request = require("supertest");
-const dbHandler = require("./db");
-const app = require("../app");
-const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
+/* eslint-disable no-loop-func */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-undef */
 
-describe("Should throw InvalidUser error for authorization", () => {
+const request = require('supertest');
+const dbHandler = require('./db');
+const app = require('../app');
+const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
+
+describe('Should throw InvalidUser error for authorization', () => {
   jest.setTimeout(35000);
   let userToken;
   beforeAll(async () => {
     await dbHandler.connect();
-    await request(app).post("/api/users/signup").send({
-      login: "kubcio",
-      email: "pawel@kubcio.com",
-      password: "kubcio",
-      retypePassword: "kubcio",
+    await request(app).post('/api/users/signup').send({
+      login: 'kubcio',
+      email: 'pawel@kubcio.com',
+      password: 'kubcio',
+      retypePassword: 'kubcio',
     });
   });
 
   beforeEach(async () => {
-    const user = await request(app).post("/api/users/login").send({
-      login: "kubcio",
-      password: "kubcio",
+    const user = await request(app).post('/api/users/login').send({
+      login: 'kubcio',
+      password: 'kubcio',
     });
     userToken = user.body.data.token;
   });
@@ -29,24 +33,24 @@ describe("Should throw InvalidUser error for authorization", () => {
   });
 
   const routes = [
-    "categories",
-    "shops",
-    "products",
-    "promotions/shops",
-    "promotions/products",
+    'categories',
+    'shops',
+    'products',
+    'promotions/shops',
+    'promotions/products',
   ];
 
   for (const route of routes) {
     it(`Should throw InvalidUser error for /${route}`, async () => {
       const res = await request(app).get(`/api/${route}`).send();
       expect(res.statusCode).toEqual(HTTP_STATUS_CODES.INVALID);
-      expect(res.body).toHaveProperty("message");
-      expect(res.body).toHaveProperty("name");
-      expect(res.body).toHaveProperty("status");
+      expect(res.body).toHaveProperty('message');
+      expect(res.body).toHaveProperty('name');
+      expect(res.body).toHaveProperty('status');
       expect(res.body.message).toEqual(
-        "Please log in to get access to this route"
+        'Please log in to get access to this route'
       );
-      expect(res.body.name).toEqual("InvalidUser");
+      expect(res.body.name).toEqual('InvalidUser');
     });
   }
 
@@ -54,7 +58,7 @@ describe("Should throw InvalidUser error for authorization", () => {
     it(`Should authorize route for /${route}`, async () => {
       const res = await request(app)
         .get(`/api/${route}`)
-        .set("Authorization", `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .send();
       expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK);
     });
@@ -66,7 +70,7 @@ describe("Should throw InvalidUser error for authorization", () => {
 
       const res = await request(app)
         .get(`/api/${route}`)
-        .set("Authorization", `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .send();
 
       expect(res.statusCode).toEqual(HTTP_STATUS_CODES.INVALID);
@@ -79,7 +83,7 @@ describe("Should throw InvalidUser error for authorization", () => {
 
       const res = await request(app)
         .get(`/api/${route}`)
-        .set("Authorization", `Bearer ${userToken}x`)
+        .set('Authorization', `Bearer ${userToken}x`)
         .send();
 
       expect(res.statusCode).toEqual(HTTP_STATUS_CODES.INVALID);

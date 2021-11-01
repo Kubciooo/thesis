@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 const {
   encryptPassword,
   comparePasswords,
   generatePasswordForgotToken,
-} = require("../utils/password.util");
+} = require('../utils/password.util');
 
 const userSchema = mongoose.Schema({
   login: {
@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema({
   shops: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Shop",
+      ref: 'Shop',
       default: [],
     },
   ],
@@ -29,7 +29,7 @@ const userSchema = mongoose.Schema({
   products: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: 'Product',
       default: [],
     },
   ],
@@ -49,8 +49,8 @@ const userSchema = mongoose.Schema({
   },
 });
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password") || this.isNew) return next();
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
   this.password = await encryptPassword(this.password);
   next();
@@ -60,7 +60,7 @@ userSchema.methods.validatePassword = async function (password) {
   return comparePasswords(password, this.password);
 };
 
-userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
@@ -81,7 +81,7 @@ userSchema.methods.forgotPasswordToken = async function () {
   return randomToken;
 };
 
-const User = mongoose.model("Users", userSchema);
+const User = mongoose.model('Users', userSchema);
 
 // const user = await User.findById()
 // user.shops.push(shopID) <- użyj tego jeżeli chcesz dodać do użytkownika 'user' sklep o id shopID

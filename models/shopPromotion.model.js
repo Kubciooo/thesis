@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 const shopPromotionSchema = mongoose.Schema({
   url: {
@@ -11,27 +11,27 @@ const shopPromotionSchema = mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "Category",
+      ref: 'Category',
     },
   ],
   shop: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "Shop",
+    ref: 'Shop',
   },
   type: {
     type: String,
     required: true,
     uppercase: true,
     enum: {
-      values: ["COUPON", "PROMOTION", "OTHER"],
-      message: "{VALUE} is not supported",
+      values: ['COUPON', 'PROMOTION', 'OTHER'],
+      message: '{VALUE} is not supported',
     },
   },
   coupon: {
     type: String,
     required: function () {
-      return this.type === "COUPON";
+      return this.type === 'COUPON';
     },
   },
   discountType: {
@@ -39,14 +39,14 @@ const shopPromotionSchema = mongoose.Schema({
     uppercase: true,
     required: true,
     enum: {
-      values: ["PERCENTAGE", "CASH"],
-      message: "{VALUE} is not supported",
+      values: ['PERCENTAGE', 'CASH'],
+      message: '{VALUE} is not supported',
     },
   },
   percentage: {
     type: Number,
     required: function () {
-      return this.discountType === "PERCENTAGE";
+      return this.discountType === 'PERCENTAGE';
     },
     min: 1,
     max: 100,
@@ -54,9 +54,9 @@ const shopPromotionSchema = mongoose.Schema({
   cash: {
     type: Number,
     required: function () {
-      return this.discountType === "CASH";
+      return this.discountType === 'CASH';
     },
-    message: "{VALUE} must not exceed the starting price!",
+    message: '{VALUE} must not exceed the starting price!',
   },
   startsAt: {
     type: Date,
@@ -72,6 +72,6 @@ const shopPromotionSchema = mongoose.Schema({
   },
 });
 
-const ShopPromotion = mongoose.model("ShopPromotion", shopPromotionSchema);
+const ShopPromotion = mongoose.model('ShopPromotion', shopPromotionSchema);
 
 module.exports = ShopPromotion;

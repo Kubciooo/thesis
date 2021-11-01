@@ -1,15 +1,15 @@
-const Category = require("../models/category.model");
-const AppError = require("../services/error.service");
-const tryCatch = require("../utils/tryCatch.util");
-const HTTP_STATUS_CODES = require("../constants/httpStatusCodes");
-const HTTP_STATUS_MESSAGES = require("../constants/httpStatusMessages");
+const Category = require('../models/category.model');
+const AppError = require('../services/error.service');
+const tryCatch = require('../utils/tryCatch.util');
+const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
+const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 
 const CategoryController = (() => {
   const getAllCategories = tryCatch(async (req, res, next) => {
     const categories = await Category.find();
 
     res.status(HTTP_STATUS_CODES.OK).json({
-      status: "Success",
+      status: 'Success',
       data: {
         categories,
       },
@@ -33,10 +33,9 @@ const CategoryController = (() => {
     if (!category) {
       return next(
         new AppError(
-          "NotFoundError",
+          'NotFoundError',
           HTTP_STATUS_CODES.NOT_FOUND,
-          `Category with id ${req.params.id} doesn't exist`,
-          (isOperational = true)
+          `Category with id ${req.params.id} doesn't exist`
         )
       );
     }

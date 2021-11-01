@@ -1,15 +1,15 @@
-const express = require("express");
-const ProductPromotionController = require("../controllers/productPromotion.controller");
+const express = require('express');
+const ProductPromotionController = require('../controllers/productPromotion.controller');
 
 const productPromotionRouter = express.Router();
 
 productPromotionRouter
-  .route("/")
+  .route('/')
   .get(ProductPromotionController.getAllProductPromotions)
   .post(ProductPromotionController.createProductPromotion);
 
 productPromotionRouter
-  .route("/:id")
+  .route('/:id')
   .get(ProductPromotionController.getProductPromotionsByProductId);
 
 module.exports = productPromotionRouter;

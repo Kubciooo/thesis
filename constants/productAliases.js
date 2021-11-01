@@ -1,7 +1,6 @@
 const PRODUCT_ALIASES = {
-  'ram': 'pamięć',
-  'pamięć': 'ram'
-}
-
+  ram: 'pamięć',
+  pamięć: 'ram',
+};
 
 module.exports = PRODUCT_ALIASES;

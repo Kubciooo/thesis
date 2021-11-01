@@ -1,22 +1,22 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const productPromotionSchema = mongoose.Schema({
   shop: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "Shop",
+    ref: 'Shop',
   },
   product: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "Product",
+    ref: 'Product',
   },
   type: {
     type: String,
     uppercase: true,
     enum: {
-      values: ["COUPON", "PROMOTION", "OTHER"],
-      message: "{VALUE} is not supported",
+      values: ['COUPON', 'PROMOTION', 'OTHER'],
+      message: '{VALUE} is not supported',
     },
   },
   startingPrice: {
@@ -28,40 +28,40 @@ const productPromotionSchema = mongoose.Schema({
     required: true,
     uppercase: true,
     enum: {
-      values: ["PERCENTAGE", "CASH"],
-      message: "{VALUE} is not supported",
+      values: ['PERCENTAGE', 'CASH'],
+      message: '{VALUE} is not supported',
     },
   },
   coupon: {
     type: String,
     required: function () {
-      return this.type === "COUPON";
+      return this.type === 'COUPON';
     },
   },
   percentage: {
     type: Number,
     required: function () {
-      return this.discountType === "PERCENTAGE";
+      return this.discountType === 'PERCENTAGE';
     },
     select: function () {
-      return this.discountType === "PERCENTAGE";
+      return this.discountType === 'PERCENTAGE';
     },
     min: 1,
     max: 100,
-    message: "{VALUE} is not between 1 and 99",
+    message: '{VALUE} is not between 1 and 99',
   },
   cash: {
     type: Number,
     required: function () {
-      return this.discountType === "CASH";
+      return this.discountType === 'CASH';
     },
     select: function () {
-      return this.discountType === "CASH";
+      return this.discountType === 'CASH';
     },
     validate: function (val) {
       return val <= this.startingPrice;
     },
-    message: "{VALUE} must not exceed the starting price!",
+    message: '{VALUE} must not exceed the starting price!',
   },
   startsAt: {
     type: Date,
@@ -78,7 +78,7 @@ const productPromotionSchema = mongoose.Schema({
 });
 
 const ProductPromotion = mongoose.model(
-  "ProductPromotion",
+  'ProductPromotion',
   productPromotionSchema
 );
 
