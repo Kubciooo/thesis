@@ -67,7 +67,8 @@ const Scrapper = (() => {
   const checkProductCoupon = async (product) => {
     const browser = await puppeteer.launch(
       {
-        headless: false
+        headless: false,
+        args: ['--window-size=1200,800']
       }
     );
     const page = await browser.newPage();
@@ -81,19 +82,28 @@ const Scrapper = (() => {
     } = shopOptions;
 
     page.setDefaultNavigationTimeout(60000);
+    await page.setViewport({
+      width: 1200,
+      height: 800
+    });
     await page.goto(product.url, { waitUntil: 'networkidle2' });
 
-    await page.waitForSelector(addToBasketButtonSelector);
+    await page.waitForSelector('body');
     console.log('before button selection');
     await page.waitForSelector(addToBasketButtonSelector);
+    await new Promise((r) => setTimeout(r, 3000));
 
-    await page.$eval(addToBasketButtonSelector, el => el.click());
+    const btn = await page.$(addToBasketButtonSelector);
+    console.log(btn);
+
+    await btn.evaluate(el => el.click());
     console.log('after button selector');
 
 
     for (basketSelector of additionalBasketSelectors) {
-      await new Promise((r) => setTimeout(r, 5000));
+      await new Promise((r) => setTimeout(r, 7000));
       await page.waitForSelector(basketSelector);
+      console.log(basketSelector);
       await page.$eval(basketSelector, el => el.click());
     }
     console.log('test');
@@ -103,6 +113,7 @@ const Scrapper = (() => {
     await new Promise((r) => setTimeout(r, 3000));
     console.log('pressing!');
     const couponInput = await page.$(couponInputSelector);
+    await couponInput.click();
     await couponInput.press('Backspace');
     await couponInput.type(product.coupon);
     await new Promise((r) => setTimeout(r, 5000));
@@ -113,11 +124,11 @@ const Scrapper = (() => {
 
     console.log('clicking!')
     await page.$eval(couponActivateSelector, el => el.click(), { waitUntil: 'domcontentloaded' }),
-    
+
     await page.waitForSelector('body');
     await page.waitForSelector(priceTagSelector);
 
-    await new Promise((r) => setTimeout(r, 7000));
+    await new Promise((r) => setTimeout(r, 5000));
     await page.waitForSelector(priceTagSelector);
 
 
@@ -227,5 +238,16 @@ const prod2 = {
   shop: 'xkom',
   coupon: 'prezent'
 }
-checkProductCoupon(prod2)
+
+const prod3 = {
+  url: 'https://www.mediaexpert.pl/agd-do-zabudowy/piekarniki-do-zabudowy/piekarnik-amica-ed37219x-x-type',
+  shop: 'mediaexpert',
+  coupon: 'HALLOWEEN'
+}
+const prod4 = {
+  url: 'https://www.euro.com.pl/telewizory-led-lcd-plazmowe/panasonic-tx-55hz1000e-tv-oled.bhtml',
+  shop: 'rtveuroagd',
+  coupon: 'HD011121'
+}
+checkProductCoupon(prod4)
 // scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");

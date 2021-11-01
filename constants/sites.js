@@ -76,7 +76,16 @@ const SITES_CONFIG = {
       promotionListSelector: '.emblems.is-desktop',
       promotionSelector: '.emblem .content',
       pageUrl: (productSlug, priceMin, priceMax) => `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`
-    }
+    },
+    productSelectors: {
+      addToBasketButtonSelector: '.add-to-cart',
+      additionalBasketSelectors: [
+        '.precart-main.has-background .close .icon.icon-x02',
+      ],
+      couponInputSelector: 'input[placeholder="Kod rabatowy"]',
+      couponActivateSelector: '.spark-button.submit.is-secondary.is-default.icon-left',
+      priceTagSelector: '.price.is-little'
+    },
   },
 
   rtveuroagd: {
@@ -94,7 +103,19 @@ const SITES_CONFIG = {
       promotionListSelector: '.advertising-placement-listing',
       promotionSelector: '.promotion-block',
       pageUrl: (productSlug, priceMin, priceMax) => `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`
-    }
+    },
+    productSelectors: {
+      addToBasketButtonSelector: '.add-product-to-cart',
+      additionalBasketSelectors: [
+        '#onetrust-accept-btn-handler',
+        '#warranty-encouragement > button',
+        '.go-to-basket',
+        'button[title="Usuń kod rabatowy"]'
+      ],
+      couponInputSelector: '#voucherInput',
+      couponActivateSelector: 'button[title="Zastosuj kod rabatowy"]',
+      priceTagSelector: '.summary-value.selenium-O-total-price'
+    },
   },
 
   morele: {
