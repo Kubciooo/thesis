@@ -46,6 +46,7 @@ const ErrorController = (() => {
   };
 
   const handleOtherError = (err) => {
+    console.error(err);
     const { message } = err;
     const statusCode = err.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER;
     const { name } = err;

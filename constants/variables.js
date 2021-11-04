@@ -17,7 +17,7 @@ module.exports = {
       testing: 'thisisasecretkubciokeydumdumdum',
     },
     expiresIn: {
-      development: '2m',
+      development: '30m',
       testing: '30s',
       production: '10m',
     },

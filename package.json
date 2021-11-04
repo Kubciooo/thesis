@@ -6,8 +6,6 @@
   "scripts": {
     "test": "NODE_ENV=testing jest",
     "scrap": "node services/scrapper.service.js",
-    "scrap:mediamarkt": "node mediamarkt.js",
-    "scrap:xkom": "node xkom.js",
     "start": "nodemon index.js",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix"

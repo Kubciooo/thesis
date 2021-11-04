@@ -2,37 +2,34 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const productSchema = mongoose.Schema({
-  // name, category (ewentualnie), shop_id, url
-  name: {
+  url: {
     type: String,
-    maxlength: [40, 'The name must have at most 40 characters'],
     required: true,
     unique: true,
     index: true,
-    lowercase: true,
+    validate: validator.isURL,
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
     required: true,
   },
-  prices: [
+  shop: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Shop',
+    required: true,
+  },
+  coupons: [String],
+  otherPromotions: [
     {
-      shop: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Shop',
-        required: true,
+      name: {
+        type: String,
+        trim: true,
       },
       url: {
         type: String,
-        required: true,
-        validation: validator.isURL,
+        validate: validator.isURL,
       },
-      price: {
-        type: Number,
-        required: true,
-      },
-      otherPromotions: [String],
     },
   ],
 });

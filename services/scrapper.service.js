@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 const puppeteer = require('puppeteer-extra');
@@ -23,7 +24,11 @@ const Scrapper = (() => {
   const getSlug = (name, separator) =>
     slugify(name, { replacement: separator, lower: true });
 
-  const stripWhitespaces = (text) => text.replace(/(\r\n|\n|\r|\t)/gm, '');
+  const stripWhitespaces = (text) => {
+    let replaced = text.replace(/(\r\n|\n|\r|\t)/gm, '');
+    replaced = replaced.replace('[  \t]+', '');
+    return replaced;
+  };
 
   const formatString = (unformatted, tagFormatter) => {
     let formatted = unformatted;
@@ -80,7 +85,7 @@ const Scrapper = (() => {
         !candidateProductList.includes(slug) &&
         !candidateProductList.includes(slugAlias)
       ) {
-        if (!(+slug).isNan() || !candidateProductList.join('').includes(slug)) {
+        if (!isNaN(+slug) || !candidateProductList.join('').includes(slug)) {
           let isItemIncludedAsString = false;
           for (const product of candidateProductList) {
             if (product.includes(slug) || product.includes(slugAlias)) {
@@ -111,6 +116,7 @@ const Scrapper = (() => {
     const page = await browser.newPage();
     const shopOptions = SITES_CONFIG[product.shop].productSelectors;
     const actionDelay = SITES_CONFIG[product.shop].actionsDelay;
+    const { priceTagFormatter } = SITES_CONFIG[product.shop];
 
     const {
       addToBasketButtonSelector,
@@ -168,19 +174,36 @@ const Scrapper = (() => {
       (price) => price.innerText
     );
 
-    console.log(`before: ${priceTagBefore}, after: ${priceTagAfter}`);
+    const priceBefore = parseFloat(
+      formatString(priceTagBefore, priceTagFormatter)
+    );
+    const priceAfter = parseFloat(
+      formatString(priceTagAfter, priceTagFormatter)
+    );
 
     await browser.close();
+    return [priceBefore, priceAfter];
   };
 
   const scrapPages = async (shops, priceMin, priceMax, productName) => {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
+      ignoreHTTPSErrors: true,
+      slowMo: 0,
+      args: [
+        '--window-size=1400,900',
+        '--remote-debugging-port=9222',
+        '--remote-debugging-address=0.0.0.0', // You know what your doing?
+        '--disable-gpu',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--blink-settings=imagesEnabled=true',
+      ],
     });
 
-    const scrapSinglePage = async (shopName) => {
+    const scrapSinglePage = async (shopName, shopId, shopCategory) => {
       const candidateProducts = [];
       const page = await browser.newPage();
+
       page.setDefaultNavigationTimeout(60000);
 
       const shopOptions = SITES_CONFIG[shopName].shopSelectors;
@@ -224,6 +247,7 @@ const Scrapper = (() => {
             item,
             itemPriceSelector
           );
+
           const nameSlug = getSlug(name, separator);
 
           if (
@@ -235,6 +259,7 @@ const Scrapper = (() => {
             const url = isSinglePage
               ? page.url()
               : await item.$eval(itemNameSelector, (el) => el.href);
+
             const promotions = shopOptions.promotionListSelector
               ? await getPromotionsListForSingleItem(
                   page,
@@ -245,33 +270,38 @@ const Scrapper = (() => {
               : [];
 
             candidateProducts.push({
-              shopName: shopOptions.name,
+              shop: shopId,
+              category: shopCategory,
               name,
               price,
               url,
-              promotions,
+              otherPromotions: promotions,
             });
           }
         }
-
         return candidateProducts;
       } catch (err) {
         return new AppError(
           'ScrapperError',
           HTTP_STATUS_CODES.INTERNAL_SERVER,
-          'The scrapper got some issues!'
+          `The scrapper got some issues while parsing ${shopName} with ${shopName}!`
         );
       }
     };
 
     const shopsPromisesArray = shops.map(
-      (shop) => new Promise((resolve) => resolve(scrapSinglePage(shop)))
+      (shop) =>
+        new Promise((resolve) =>
+          resolve(scrapSinglePage(shop.name, shop.id, shop.category))
+        )
     );
     const arrayOfShopsArrays = await Promise.all(shopsPromisesArray);
 
     const concatenatedProductsArray = [];
     for (const array of arrayOfShopsArrays) {
-      concatenatedProductsArray.push(...array);
+      if (array) {
+        concatenatedProductsArray.push(...array);
+      }
     }
 
     const sortedProducts = concatenatedProductsArray.sort(
@@ -289,35 +319,35 @@ const Scrapper = (() => {
 module.exports = Scrapper;
 // const { scrapPages } = Scrapper;
 
-const { checkProductCoupon } = Scrapper;
+// const { checkProductCoupon } = Scrapper;
 
-const product = {
-  url: 'https://mediamarkt.pl/telefony-i-smartfony/smartfon-samsung-galaxy-a52s-5g-6gb-128gb-czarny-sm-a528bzkdeue',
-  coupon: '50za500KLUB',
-  shop: 'mediamarkt',
-};
+// const product = {
+//   url: 'https://mediamarkt.pl/telefony-i-smartfony/smartfon-samsung-galaxy-a52s-5g-6gb-128gb-czarny-sm-a528bzkdeue',
+//   coupon: '50za500KLUB',
+//   shop: 'mediamarkt',
+// };
 
-const prod2 = {
-  url: 'https://www.x-kom.pl/p/654050-telewizor-60-69-samsung-qe65qn90a.html',
-  shop: 'xkom',
-  coupon: 'prezent',
-};
+// const prod2 = {
+//   url: 'https://www.x-kom.pl/p/654050-telewizor-60-69-samsung-qe65qn90a.html',
+//   shop: 'xkom',
+//   coupon: 'prezent',
+// };
 
-const prod3 = {
-  url: 'https://www.mediaexpert.pl/agd-do-zabudowy/piekarniki-do-zabudowy/piekarnik-amica-ed37219x-x-type',
-  shop: 'mediaexpert',
-  coupon: 'HALLOWEEN',
-};
-const prod4 = {
-  url: 'https://www.euro.com.pl/telewizory-led-lcd-plazmowe/panasonic-tx-55hz1000e-tv-oled.bhtml',
-  shop: 'rtveuroagd',
-  coupon: 'HD011121',
-};
-const prod5 = {
-  url: 'https://www.morele.net/sluchawki-corsair-hs70-pro-wireless-ca-9011210-eu-6324974/',
-  shop: 'morele',
-  coupon: 'CORS21',
-};
+// const prod3 = {
+//   url: 'https://www.mediaexpert.pl/agd-do-zabudowy/piekarniki-do-zabudowy/piekarnik-amica-ed37219x-x-type',
+//   shop: 'mediaexpert',
+//   coupon: 'HALLOWEEN',
+// };
+// const prod4 = {
+//   url: 'https://www.euro.com.pl/telewizory-led-lcd-plazmowe/panasonic-tx-55hz1000e-tv-oled.bhtml',
+//   shop: 'rtveuroagd',
+//   coupon: 'HD011121',
+// };
+// const prod5 = {
+//   url: 'https://www.morele.net/sluchawki-corsair-hs70-pro-wireless-ca-9011210-eu-6324974/',
+//   shop: 'morele',
+//   coupon: 'CORS21',
+// };
 
-checkProductCoupon(prod5);
+// checkProductCoupon(prod5);
 // scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");
