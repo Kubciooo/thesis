@@ -29,6 +29,7 @@ const ProductController = (() => {
       if (!req.body.productName) blankItems.push('productName');
       if (!req.body.shops) blankItems.push('shops');
       if (!req.body.categoryId) blankItems.push('categoryId');
+
       return next(
         new AppError(
           'HTTPValidationError',
@@ -37,6 +38,7 @@ const ProductController = (() => {
         )
       );
     }
+
     const { minPrice, maxPrice, productName, shops, categoryId } = req.body;
     const shopsData = [];
     const shopsNames = [];
@@ -71,8 +73,15 @@ const ProductController = (() => {
       parseFloat(maxPrice),
       productName
     );
-    await Product.deleteMany({});
-    const products = await Product.create(scrapData);
+
+    const products = [];
+    for (const prod of scrapData) {
+      const productDB = await Product.findOne({ url: prod.url });
+
+      if (!productDB) {
+        products.push(await Product.create(prod));
+      }
+    }
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_MESSAGES.OK,

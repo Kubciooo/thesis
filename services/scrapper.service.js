@@ -99,6 +99,10 @@ const Scrapper = (() => {
     return true;
   };
 
+  /**
+   * @param {Object} product - product object with shop, url and coupon properties
+   * @returns [priceBefore, priceAfter] - price before adding the coupon and after adding the coupon
+   */
   const checkProductCoupon = async (product) => {
     const browser = await puppeteer.launch({
       headless: false,
@@ -120,6 +124,7 @@ const Scrapper = (() => {
 
     const {
       addToBasketButtonSelector,
+      productOutOfStockSelector,
       additionalBasketSelectors,
       couponInputSelector,
       couponActivateSelector,
@@ -134,6 +139,13 @@ const Scrapper = (() => {
     await page.goto(product.url, { waitUntil: 'networkidle2' });
 
     await page.waitForSelector('body');
+
+    if (productOutOfStockSelector) {
+      const btnProductOutOfStock = await page.$(productOutOfStockSelector);
+      if (btnProductOutOfStock) {
+        return [-1, -1];
+      }
+    }
 
     await page.waitForSelector(addToBasketButtonSelector);
     await waitRandomTime(page, actionDelay);

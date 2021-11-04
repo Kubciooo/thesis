@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 
 const productPromotionSchema = mongoose.Schema({
-  shop: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'Shop',
-  },
   product: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
