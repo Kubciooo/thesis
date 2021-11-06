@@ -12,7 +12,7 @@ productRouter.route('/scrapper').get(ProductController.addProductsFromScrapper);
 productRouter
   .route('/:id')
   .get(ProductController.getProductById)
-  .post(ProductController.followProductById)
-  .patch(ProductController.unfollowProductById);
+  .patch(ProductController.followProductById)
+  .delete(ProductController.unfollowProductById);
 
 module.exports = productRouter;

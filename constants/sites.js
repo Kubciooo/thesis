@@ -47,6 +47,7 @@ const SITES_CONFIG = {
         `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`,
     },
     productSelectors: {
+      productOutOfStockSelector: '.sc-12cu01r-5.cjNyNK',
       addToBasketButtonSelector: 'button[title="Dodaj do koszyka"]',
       additionalBasketSelectors: [
         'a.sc-1h16fat-0.sc-1v4lzt5-11.emnmDG.sc-153gokr-0.jRbixD',

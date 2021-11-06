@@ -34,21 +34,13 @@ const ProductPromotionController = (() => {
       );
     }
 
-    if (productPromotion.type === 'COUPON') {
+    if (productPromotion.type === 'COUPON' && !req.body.userValidation) {
       const [productPriceBefore, productPriceAfter] = await checkProductCoupon({
         url: product.url,
         shop: product.shop.name,
         coupon: productPromotion.coupon,
       });
-      if (req.body.userValidation) {
-        await productPromotion.save();
-        res.status(HTTP_STATUS_CODES.OK_POST).json({
-          status: HTTP_STATUS_MESSAGES.OK,
-          data: {
-            productPromotion,
-          },
-        });
-      } else if (productPriceBefore !== productPriceAfter) {
+      if (productPriceBefore !== productPriceAfter) {
         product.coupons.push(productPromotion.coupon);
         product.price = Math.min(product.price, productPriceAfter);
         await product.save();

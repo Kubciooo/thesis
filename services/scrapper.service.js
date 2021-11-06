@@ -74,7 +74,7 @@ const Scrapper = (() => {
    */
   const checkProductCoupon = async (product) => {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -168,7 +168,7 @@ const Scrapper = (() => {
 
   const scrapPages = async (shops, priceMin, priceMax, productName) => {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -207,7 +207,6 @@ const Scrapper = (() => {
         if (isSinglePage) {
           if (await page.$(shopOptions.itemSinglePageNameSelector)) {
             itemNameSelector = shopOptions.itemSinglePageNameSelector;
-
             if (shopOptions.itemSinglePagePriceSelector) {
               itemPriceSelector = shopOptions.itemSinglePagePriceSelector;
             }
@@ -289,7 +288,7 @@ const Scrapper = (() => {
       (a, b) => a.price - b.price
     );
     // console.dir(sortedProducts, { depth: null });
-    await browser.close();
+    // await browser.close();
 
     return sortedProducts;
   };
