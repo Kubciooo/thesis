@@ -2,12 +2,16 @@
 /* eslint-disable no-await-in-loop */
 const Product = require('../models/product.model');
 const Shop = require('../models/shop.model');
+const User = require('../models/user.model');
 const Category = require('../models/category.model');
 const AppError = require('../services/error.service');
 const tryCatch = require('../utils/tryCatch.util');
+const getSlug = require('../utils/getSlug.util');
+const isProductSlugIncluded = require('../utils/isProductSlugIncluded.util');
 const Scrapper = require('../services/scrapper.service');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
+const SITES_CONFIG = require('../constants/sites');
 
 const ProductController = (() => {
   const addProductsFromScrapper = tryCatch(async (req, res, next) => {
@@ -92,12 +96,39 @@ const ProductController = (() => {
   });
 
   const getAllProducts = tryCatch(async (req, res, next) => {
-    const products = await Product.find(req.query);
+    let products = Product.find().populate('shop');
+
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'limit'];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    products = products.find(JSON.parse(queryStr));
+
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    products = products.skip(skip).limit(limit);
+
+    let productsData = await products;
+
+    if (req.body.name) {
+      productsData = productsData.filter((product) => {
+        const { separator } = SITES_CONFIG[product.shop.name];
+        const productSlug = getSlug(product.name, separator);
+        const searchSlug = getSlug(req.body.name, separator);
+
+        return isProductSlugIncluded(searchSlug, productSlug, separator);
+      });
+    }
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: 'Success',
       data: {
-        products,
+        products: productsData,
       },
     });
   });
@@ -134,11 +165,73 @@ const ProductController = (() => {
     });
   });
 
+  const followProductById = tryCatch(async (req, res, next) => {
+    const { user } = req;
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Product with id ${productId} doesn't exist`
+        )
+      );
+    }
+    if (!user.products.includes(product._id)) {
+      user.products.push(product._id);
+    }
+    await user.save();
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        user,
+      },
+    });
+  });
+
+  const unfollowProductById = tryCatch(async (req, res, next) => {
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Product with id ${productId} doesn't exist`
+        )
+      );
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $pull: { products: product._id },
+      },
+      {
+        new: true,
+      }
+    );
+
+    req.user = user;
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        user,
+      },
+    });
+  });
+
   return {
     getAllProducts,
     createProduct,
     getProductById,
     addProductsFromScrapper,
+    followProductById,
+    unfollowProductById,
   };
 })();
 

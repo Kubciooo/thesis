@@ -9,15 +9,21 @@ const productSchema = mongoose.Schema({
     index: true,
     validate: validator.isURL,
   },
+  name: {
+    type: String,
+    required: true,
+  },
   price: {
     type: Number,
     required: true,
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true,
-  },
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+    },
+  ],
   shop: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Shop',

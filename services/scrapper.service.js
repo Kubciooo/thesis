@@ -2,12 +2,12 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 const puppeteer = require('puppeteer-extra');
-const slugify = require('slugify');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
 const getItemTextFromHTMLElement = require('../utils/getItemTextFromHTMLElement.util');
+const isProductSlugIncluded = require('../utils/isProductSlugIncluded.util');
+const getSlug = require('../utils/getSlug.util');
 const SITES_CONFIG = require('../constants/sites');
-const PRODUCT_ALIASES = require('../constants/productAliases');
 const AppError = require('./error.service');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 
@@ -20,9 +20,6 @@ const Scrapper = (() => {
     const timeTo = time * 1.5;
     await page.waitForTimeout(Math.floor(Math.random() * timeTo) + timeFrom);
   };
-
-  const getSlug = (name, separator) =>
-    slugify(name, { replacement: separator, lower: true });
 
   const stripWhitespaces = (text) => {
     let replaced = text.replace(/(\r\n|\n|\r|\t)/gm, '');
@@ -69,34 +66,6 @@ const Scrapper = (() => {
     }
 
     return promotionsList;
-  };
-
-  const getProductAlias = (productName) =>
-    PRODUCT_ALIASES[productName] ? PRODUCT_ALIASES[productName] : productName;
-
-  const isProductSlugIncluded = (productSlug, candidateProduct, separator) => {
-    const productSlugList = productSlug.split(separator);
-    const candidateProductList = candidateProduct.split(separator);
-
-    for (const slug of productSlugList) {
-      const slugAlias = getSlug(getProductAlias(slug), separator);
-
-      if (
-        !candidateProductList.includes(slug) &&
-        !candidateProductList.includes(slugAlias)
-      ) {
-        if (!isNaN(+slug) || !candidateProductList.join('').includes(slug)) {
-          let isItemIncludedAsString = false;
-          for (const product of candidateProductList) {
-            if (product.includes(slug) || product.includes(slugAlias)) {
-              isItemIncludedAsString = true;
-            }
-          }
-          if (!isItemIncludedAsString) return false;
-        }
-      }
-    }
-    return true;
   };
 
   /**
@@ -283,7 +252,7 @@ const Scrapper = (() => {
 
             candidateProducts.push({
               shop: shopId,
-              category: shopCategory,
+              categories: [shopCategory],
               name,
               price,
               url,
