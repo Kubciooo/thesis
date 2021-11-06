@@ -10,7 +10,11 @@ const config = {
     '<rootDir>/middlewares/*.js',
     '<rootDir>/services/*.js',
   ],
-  coveragePathIgnorePatterns: ['<rootDir>/node_modules/'],
+  coveragePathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/services/',
+  ],
+  preset: 'jest-puppeteer',
 };
 
 module.exports = config;

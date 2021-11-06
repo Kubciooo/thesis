@@ -4,12 +4,16 @@ const mongoose = require('mongoose');
 const dbHandler = require('./db');
 const app = require('../app');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
+const Product = require('../models/product.model');
+const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 
 describe('/product route', () => {
-  jest.setTimeout(20000);
+  jest.setTimeout(60000);
 
   let userToken;
   let categoryId;
+  let shopId;
+  const shops = [];
 
   beforeAll(async () => {
     await dbHandler.connect();
@@ -27,6 +31,52 @@ describe('/product route', () => {
         name: 'new category',
       });
     categoryId = categoryResponse.body.data.category._id;
+
+    const shopResponse = await request(app)
+      .post('/api/shops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        name: 'mediaexpert',
+        mainUrl: 'https://mediaexpert.pl',
+      });
+    shopId = shopResponse.body.data.shop._id;
+    shops.push(shopId);
+
+    const shopResponse2 = await request(app)
+      .post('/api/shops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        name: 'mediamarkt',
+        mainUrl: 'https://mediamarkt.pl/',
+      });
+    shops.push(shopResponse2.body.data.shop._id);
+
+    const shopResponse3 = await request(app)
+      .post('/api/shops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        name: 'xkom',
+        mainUrl: 'https://www.x-kom.pl/',
+      });
+    shops.push(shopResponse3.body.data.shop._id);
+
+    const shopResponse4 = await request(app)
+      .post('/api/shops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        name: 'rtveuroagd',
+        mainUrl: 'https://www.euro.com.pl/',
+      });
+    shops.push(shopResponse4.body.data.shop._id);
+
+    const shopResponse5 = await request(app)
+      .post('/api/shops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        name: 'morele',
+        mainUrl: 'https://morele.net/',
+      });
+    shops.push(shopResponse5.body.data.shop._id);
   });
 
   beforeEach(async () => {
@@ -40,149 +90,232 @@ describe('/product route', () => {
   afterEach(async () => await dbHandler.clearCollection('products'));
   afterAll(async () => await dbHandler.closeDatabase());
 
-  it('Should get products after autorizing', async () => {
-    const res = await request(app)
-      .get('/api/products')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send();
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK);
-  });
-
-  it('Should add new product', async () => {
-    const res = await request(app)
+  it('should create a new product item', async () => {
+    const response = await request(app)
       .post('/api/products')
       .set('Authorization', `Bearer ${userToken}`)
       .send({
-        name: 'new product',
-        category: categoryId,
+        url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
       });
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
-    expect(res.body).toHaveProperty('data');
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+    expect(response.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(response.body.data.product.price).toBe(429);
+    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
+    expect(response.body.data.product.otherPromotions).toHaveLength(2);
+    expect(response.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+    const product = await Product.findById(response.body.data.product._id);
+
+    expect(product.name).toBe('Kuchenka mikrofalowa SAMSUNG GE83X');
+    expect(product.price).toBe(429);
+    expect(product.coupons).toEqual(['testing-coupon']);
+    expect(product.otherPromotions).toHaveLength(2);
+    expect(product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
   });
 
-  it('Should find product by id', async () => {
+  it('should find a product item', async () => {
+    const response = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+    expect(response.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(response.body.data.product.price).toBe(429);
+    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
+    expect(response.body.data.product.otherPromotions).toHaveLength(2);
+    expect(response.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
     const productResponse = await request(app)
-      .post('/api/products')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        name: 'new product',
-        category: categoryId,
-      });
-    const { product } = productResponse.body.data;
+      .get(`/api/products/${response.body.data.product._id}`)
+      .set('Authorization', `Bearer ${userToken}`);
 
-    const res = await request(app)
-      .get(`/api/products/${product._id}`)
-      .set('Authorization', `Bearer ${userToken}`)
-      .send();
-
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK);
-    expect(res.body).toHaveProperty('data');
-    expect(res.body.data).toHaveProperty('product');
-    expect(res.body.data.product).toHaveProperty('_id');
-    expect(res.body.data.product._id).toEqual(product._id);
-  });
-
-  it('Should throw NotFoundError', async () => {
-    const randomToken = mongoose.Types.ObjectId();
-    const res = await request(app)
-      .get(`/api/products/${randomToken}`)
-      .set('Authorization', `Bearer ${userToken}`)
-      .send();
-
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
-    expect(res.body).not.toHaveProperty('data');
-    expect(res.body).toHaveProperty('message');
-    expect(res.body.message).toEqual(
-      `Product with id ${randomToken} doesn't exist`
+    expect(productResponse.body).toHaveProperty('data');
+    expect(productResponse.body.data).toHaveProperty('product');
+    expect(productResponse.body.data.product).toHaveProperty('name');
+    expect(productResponse.body.data.product).toHaveProperty('price');
+    expect(productResponse.body.data.product).toHaveProperty('coupons');
+    expect(productResponse.body.data.product).toHaveProperty('otherPromotions');
+    expect(productResponse.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
     );
-    expect(res.body.name).toEqual('NotFoundError');
-  });
-
-  it('Should throw Cast Error', async () => {
-    const randomToken = mongoose.Types.ObjectId();
-    const res = await request(app)
-      .get(`/api/products/${randomToken}g`)
-      .set('Authorization', `Bearer ${userToken}`)
-      .send();
-
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
-    expect(res.body).not.toHaveProperty('data');
-    expect(res.body).toHaveProperty('message');
-    expect(res.body.message).toEqual(`Invalid _id: ${randomToken}g.`);
-    expect(res.body.name).toEqual('Cast Error');
-  });
-
-  it('Should throw Unique Duplicates Error', async () => {
-    await request(app)
-      .post('/api/products')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        name: 'new product',
-        category: categoryId,
-      });
-
-    const res = await request(app)
-      .post('/api/products')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        name: 'new product',
-        category: categoryId,
-      });
-
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
-    expect(res.body).not.toHaveProperty('data');
-    expect(res.body).toHaveProperty('name');
-    expect(res.body).toHaveProperty('message');
-    expect(res.body.name).toEqual('Unique Duplicates Error');
-    expect(res.body.message).toEqual(
-      'The value "new product" already exists in DB - please use other value'
+    expect(productResponse.body.data.product.price).toBe(429);
+    expect(productResponse.body.data.product.coupons).toEqual([
+      'testing-coupon',
+    ]);
+    expect(productResponse.body.data.product.otherPromotions).toHaveLength(2);
+    expect(productResponse.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
     );
   });
 
-  it('product name too long - Should throw Validation Error', async () => {
-    const res = await request(app)
+  it('should find 2 products', async () => {
+    const response = await request(app)
       .post('/api/products')
       .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        name: 'new product with a name that is way way waaaaay tooooooo long',
-        category: categoryId,
-      });
+      .send([
+        {
+          url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+          name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+          price: 429,
+          categories: [categoryId],
+          shop: shopId,
+          coupons: ['testing-coupon'],
+          otherPromotions: [
+            {
+              name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+            },
+            {
+              url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+            },
+          ],
+        },
+        {
+          url: 'https://www.mediaexpert.pl/komputery-i-tablety/laptopy-i-ultrabooki/laptopy/notebook-asus-zbook-13-ux325ja-kg249t-i5-1035g4-16gb-512ssd-irisxe-13-3-w10-pink',
+          name: 'Laptop ASUS ZenBook 13.3" OLED i5-1035G4 16GB SSD 512GB Windows 10 Home',
+          price: 4499,
+          categories: [categoryId],
+          shop: shopId,
+          coupons: ['MLO-061121'],
+          otherPromotions: [
+            {
+              name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+            },
+            {
+              url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+            },
+            {
+              name: 'Pół roku nie płacisz! Pierwsza rata w maju 2022              ',
+            },
+          ],
+        },
+      ]);
 
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
-    expect(res.body).not.toHaveProperty('data');
-    expect(res.body).toHaveProperty('name');
-    expect(res.body).toHaveProperty('message');
-    expect(res.body.name).toEqual('Validation Error');
-    expect(res.body.message).toEqual(
-      'Invalid input data. The name must have at most 40 characters'
-    );
-  });
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
 
-  it('Should find 2 products', async () => {
-    await request(app)
-      .post('/api/products')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        name: 'new product',
-        category: categoryId,
-      });
-
-    await request(app)
-      .post('/api/products')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        name: 'second new product',
-        category: categoryId,
-      });
-
-    const res = await request(app)
+    const allProductsResponse = await request(app)
       .get('/api/products')
       .set('Authorization', `Bearer ${userToken}`)
       .send();
 
-    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK);
-    expect(res.body).toHaveProperty('data');
-    expect(res.body.data).toHaveProperty('products');
-    expect(res.body.data.products).toHaveLength(2);
+    expect(allProductsResponse.body).toHaveProperty('data');
+    expect(allProductsResponse.body.data).toHaveProperty('products');
+    expect(allProductsResponse.body.data.products).toHaveLength(2);
+    expect(allProductsResponse.body.data.products[0].name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(allProductsResponse.body.data.products[0].price).toBe(429);
+    expect(allProductsResponse.body.data.products[0].coupons).toEqual([
+      'testing-coupon',
+    ]);
+    expect(
+      allProductsResponse.body.data.products[0].otherPromotions
+    ).toHaveLength(2);
+    expect(
+      allProductsResponse.body.data.products[0].otherPromotions[0].name
+    ).toBe('Multirabaty! Piąty wybrany produkt za 1 zł!');
+    expect(allProductsResponse.body.data.products[1].name).toBe(
+      'Laptop ASUS ZenBook 13.3" OLED i5-1035G4 16GB SSD 512GB Windows 10 Home'
+    );
+    expect(allProductsResponse.body.data.products[1].price).toBe(4499);
+    expect(allProductsResponse.body.data.products[1].coupons).toEqual([
+      'MLO-061121',
+    ]);
+    expect(
+      allProductsResponse.body.data.products[1].otherPromotions
+    ).toHaveLength(3);
+    expect(
+      allProductsResponse.body.data.products[1].otherPromotions[0].name
+    ).toBe('Multirabaty! Piąty wybrany produkt za 1 zł!');
+    expect(
+      allProductsResponse.body.data.products[1].otherPromotions[2].name
+    ).toBe('Pół roku nie płacisz! Pierwsza rata w maju 2022');
+  });
+
+  it('Should run scrapper for all shops', async () => {
+    const response = await request(app)
+      .get('/api/products/scrapper')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        minPrice: 3000,
+        maxPrice: 6000,
+        productName: 'iphone 12 pro',
+        categoryId,
+        shops,
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(response.body).toHaveProperty('data');
+    expect(response.body.data).toHaveProperty('products');
+    expect(response.body.data.products).not.toHaveLength(0);
+  });
+
+  it('Should throw ValidationError', async () => {
+    const response = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        url: 'Wrong url!',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.BAD_REQUEST);
+    expect(response.body).toHaveProperty('status');
+    expect(response.body.status).toBe(HTTP_STATUS_MESSAGES.ERROR);
+    expect(response.body).toHaveProperty('name');
+    expect(response.body.name).toBe('Validation Error');
+    expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toBe(
+      'Invalid input data. Validator failed for path `url` with value `Wrong url!`'
+    );
   });
 });

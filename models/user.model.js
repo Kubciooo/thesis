@@ -50,7 +50,7 @@ const userSchema = mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || this.isNew) return next();
+  if (!this.isModified('password') || !this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
   this.password = await encryptPassword(this.password);
   next();

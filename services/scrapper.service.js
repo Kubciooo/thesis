@@ -197,7 +197,7 @@ const Scrapper = (() => {
       const pageURL = shopOptions.pageUrl(productSlug, priceMin, priceMax);
 
       try {
-        await page.goto(pageURL, { waitUntil: 'networkidle2' });
+        await page.goto(pageURL, { waitUntil: 'domcontentloaded' });
 
         await page.waitForSelector('body');
         isSinglePage =
@@ -229,7 +229,6 @@ const Scrapper = (() => {
           );
 
           const nameSlug = getSlug(name, separator);
-
           if (
             priceTag &&
             isProductSlugIncluded(productSlug, nameSlug, separator)
@@ -259,8 +258,10 @@ const Scrapper = (() => {
             });
           }
         }
+        await page.close();
         return candidateProducts;
       } catch (err) {
+        console.log(err);
         return new AppError(
           'ScrapperError',
           HTTP_STATUS_CODES.INTERNAL_SERVER,
@@ -276,7 +277,6 @@ const Scrapper = (() => {
         )
     );
     const arrayOfShopsArrays = await Promise.all(shopsPromisesArray);
-
     const concatenatedProductsArray = [];
     for (const array of arrayOfShopsArrays) {
       if (array) {
@@ -287,8 +287,9 @@ const Scrapper = (() => {
     const sortedProducts = concatenatedProductsArray.sort(
       (a, b) => a.price - b.price
     );
+
     // console.dir(sortedProducts, { depth: null });
-    // await browser.close();
+    await browser.close();
 
     return sortedProducts;
   };
