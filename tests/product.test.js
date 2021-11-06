@@ -318,4 +318,41 @@ describe('/product route', () => {
       'Invalid input data. Validator failed for path `url` with value `Wrong url!`'
     );
   });
+
+  it('should throw NotFoundError', async () => {
+    const id = mongoose.Types.ObjectId();
+
+    const response = await request(app)
+      .get(`/api/products/${id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(response.body).toHaveProperty('status');
+    expect(response.body.status).toBe(HTTP_STATUS_MESSAGES.ERROR);
+    expect(response.body).toHaveProperty('name');
+    expect(response.body.name).toBe('NotFoundError');
+    expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toBe(`Product with id ${id} doesn't exist`);
+  });
+
+  it('Should throw HTTPValidationError', async () => {
+    const response = await request(app)
+      .get('/api/products/scrapper')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        productName: 'iphone 12 pro',
+        categoryId,
+        shops,
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.INVALID);
+    expect(response.body).toHaveProperty('status');
+    expect(response.body.status).toBe(HTTP_STATUS_MESSAGES.ERROR);
+    expect(response.body).toHaveProperty('name');
+    expect(response.body.name).toBe('HTTPValidationError');
+    expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toBe(
+      '{minPrice, maxPrice} fields are required.'
+    );
+  });
 });
