@@ -18,6 +18,7 @@ const SITES_CONFIG = {
         `https://mediamarkt.pl/search?sort=price_asc&limit=100&page=1&query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}`,
     },
     productSelectors: {
+      startingPriceSelector: '.main-price.is-big',
       addToBasketButtonSelector:
         '.spark-button.add-button.is-primary.is-medium.icon-left.show-price-button',
       additionalBasketSelectors: [
@@ -47,6 +48,7 @@ const SITES_CONFIG = {
         `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`,
     },
     productSelectors: {
+      startingPriceSelector: '.n4n86h-4.edNVst',
       productOutOfStockSelector: '.sc-12cu01r-5.cjNyNK',
       addToBasketButtonSelector: 'button[title="Dodaj do koszyka"]',
       additionalBasketSelectors: [
@@ -80,6 +82,7 @@ const SITES_CONFIG = {
         `https://www.mediaexpert.pl/search/?query%5Bmenu_item%5D=&query%5Bquerystring%5D=${productSlug}&priceFilter%5Bmin%5D=${priceMin}&priceFilter%5Bmax%5D=${priceMax}&limit=50&page=1&sort=price_asc`,
     },
     productSelectors: {
+      startingPriceSelector: '.product-price',
       productOutOfStockSelector: '.check-and-buy',
       addToBasketButtonSelector: '.add-to-cart',
       additionalBasketSelectors: [
@@ -111,6 +114,7 @@ const SITES_CONFIG = {
         `https://www.euro.com.pl/search,d3,od${priceMin}do${priceMax}.bhtml?keyword=${productSlug}`,
     },
     productSelectors: {
+      startingPriceSelector: '.product-price',
       addToBasketButtonSelector: '.add-product-to-cart',
       additionalBasketSelectors: [
         '#onetrust-accept-btn-handler',
@@ -143,6 +147,7 @@ const SITES_CONFIG = {
         `https://www.morele.net/wyszukiwarka/0/0/${priceMin}.00,${priceMax}.00,,,,,,p,0,,,,/1/?q=${productSlug}`,
     },
     productSelectors: {
+      startingPriceSelector: '.product-price',
       addToBasketButtonSelector: '.add-to-cart__btn',
       additionalBasketSelectors: [
         '.js_no-warrant-btn',

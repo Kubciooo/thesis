@@ -68,6 +68,42 @@ const Scrapper = (() => {
     return promotionsList;
   };
 
+  const checkProductPrice = async (product) => {
+    const browser = await puppeteer.launch({
+      headless: true,
+      ignoreHTTPSErrors: true,
+      slowMo: 0,
+      args: [
+        '--window-size=1400,900',
+        '--remote-debugging-port=9222',
+        '--remote-debugging-address=0.0.0.0', // You know what your doing?
+        '--disable-gpu',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--blink-settings=imagesEnabled=true',
+      ],
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1400, height: 900 });
+    await page.goto(product.url, {
+      waitUntil: 'networkidle0',
+    });
+    await waitRandomTime(page, 1000);
+    const shopOptions = SITES_CONFIG[product.shop].productSelectors;
+    const { priceTagFormatter } = SITES_CONFIG[product.shop];
+
+    const { startingPriceSelector } = shopOptions;
+    const startingPrice = await page.$eval(
+      startingPriceSelector,
+      (el) => el.innerText
+    );
+
+    let price = -1;
+    if (startingPrice) {
+      price = formatString(startingPrice, priceTagFormatter);
+    }
+    return price;
+  };
+
   /**
    * @param {Object} product - product object with shop, url and coupon properties
    * @returns [priceBefore, priceAfter] - price before adding the coupon and after adding the coupon
@@ -294,7 +330,7 @@ const Scrapper = (() => {
     return sortedProducts;
   };
 
-  return { scrapPages, checkProductCoupon };
+  return { scrapPages, checkProductCoupon, checkProductPrice };
 })();
 
 module.exports = Scrapper;
