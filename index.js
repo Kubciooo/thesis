@@ -5,6 +5,7 @@ const { updateAllProductsFromDB } = require('./services/scrapper.service');
 
 dotenv.config({ path: './config.env' });
 const app = require('./app');
+const milisecondsFromHours = require('./utils/milisecondsFromHours.util');
 
 const DB = database[process.env.NODE_ENV || 'development'];
 
@@ -15,7 +16,7 @@ mongoose
   })
   .then(() => {
     console.log('DB connection successful');
-    updateAllProductsFromDB();
+    setInterval(updateAllProductsFromDB, milisecondsFromHours(6));
   });
 
 const port = process.env.PORT || 8080;

@@ -121,7 +121,7 @@ const Scrapper = (() => {
    */
   const checkProductCoupon = async (product, coupon) => {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -149,8 +149,8 @@ const Scrapper = (() => {
 
     page.setDefaultNavigationTimeout(60000);
     await page.setViewport({
-      width: 1200,
-      height: 800,
+      width: 1400,
+      height: 900,
     });
     await page.goto(product.url, { waitUntil: 'networkidle2' });
 
@@ -233,6 +233,10 @@ const Scrapper = (() => {
       const page = await browser.newPage();
 
       page.setDefaultNavigationTimeout(60000);
+      await page.setViewport({
+        width: 1400,
+        height: 900,
+      });
 
       const shopOptions = SITES_CONFIG[shopName].shopSelectors;
       const { separator } = SITES_CONFIG[shopName];

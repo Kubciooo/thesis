@@ -49,6 +49,7 @@ const ProductPromotionController = (() => {
           otherPromotions: product.otherPromotions,
           updatedAt: Date.now(),
         };
+
         product.coupons.push(productPromotion.coupon);
         product.price = Math.min(product.price, productPriceAfter);
         product.snapshots.push(newSnapshot);
@@ -105,10 +106,35 @@ const ProductPromotionController = (() => {
     });
   });
 
+  const getProductPromotionsByProductUrl = tryCatch(async (req, res, next) => {
+    const product = await Product.findOne({ url: req.params.url });
+    const productPromotions = await ProductPromotion.find({
+      product: product._id,
+    }).sort('-expiresAt');
+
+    if (!product) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Product with url ${req.params.url} doesn't exist`
+        )
+      );
+    }
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        productPromotions,
+      },
+    });
+  });
+
   return {
     getAllProductPromotions,
     createProductPromotion,
     getProductPromotionsByProductId,
+    getProductPromotionsByProductUrl,
   };
 })();
 
