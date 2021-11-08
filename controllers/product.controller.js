@@ -225,6 +225,27 @@ const ProductController = (() => {
     });
   });
 
+  const getAllFollowedProducts = tryCatch(async (req, res, next) => {
+    const user = await User.findById(req.user._id).populate('products');
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        products: user.products,
+      },
+    });
+  });
+
   return {
     getAllProducts,
     createProduct,
@@ -232,6 +253,7 @@ const ProductController = (() => {
     addProductsFromScrapper,
     followProductById,
     unfollowProductById,
+    getAllFollowedProducts,
   };
 })();
 

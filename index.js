@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { database } = require('./constants/variables');
+const { updateAllProductsFromDB } = require('./services/scrapper.service');
 
 dotenv.config({ path: './config.env' });
 const app = require('./app');
@@ -12,7 +13,10 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log('DB connection successful'));
+  .then(() => {
+    console.log('DB connection successful');
+    updateAllProductsFromDB();
+  });
 
 const port = process.env.PORT || 8080;
 

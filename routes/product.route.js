@@ -9,6 +9,7 @@ productRouter
   .post(ProductController.createProduct);
 
 productRouter.route('/scrapper').get(ProductController.addProductsFromScrapper);
+productRouter.route('/user').get(ProductController.getAllFollowedProducts);
 productRouter
   .route('/:id')
   .get(ProductController.getProductById)

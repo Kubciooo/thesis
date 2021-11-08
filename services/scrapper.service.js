@@ -8,8 +8,9 @@ const getItemTextFromHTMLElement = require('../utils/getItemTextFromHTMLElement.
 const isProductSlugIncluded = require('../utils/isProductSlugIncluded.util');
 const getSlug = require('../utils/getSlug.util');
 const SITES_CONFIG = require('../constants/sites');
-const AppError = require('./error.service');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
+const AppError = require('./error.service');
+const Product = require('../models/product.model');
 
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
@@ -19,6 +20,14 @@ const Scrapper = (() => {
     const timeFrom = time;
     const timeTo = time * 1.5;
     await page.waitForTimeout(Math.floor(Math.random() * timeTo) + timeFrom);
+  };
+
+  const sleep = async (time) => {
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, time);
+    });
   };
 
   const stripWhitespaces = (text) => {
@@ -70,7 +79,7 @@ const Scrapper = (() => {
 
   const checkProductPrice = async (product) => {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -85,7 +94,7 @@ const Scrapper = (() => {
     const page = await browser.newPage();
     await page.setViewport({ width: 1400, height: 900 });
     await page.goto(product.url, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'domcontentloaded',
     });
     await waitRandomTime(page, 1000);
     const shopOptions = SITES_CONFIG[product.shop].productSelectors;
@@ -101,6 +110,8 @@ const Scrapper = (() => {
     if (startingPrice) {
       price = formatString(startingPrice, priceTagFormatter);
     }
+
+    browser.close();
     return price;
   };
 
@@ -108,7 +119,7 @@ const Scrapper = (() => {
    * @param {Object} product - product object with shop, url and coupon properties
    * @returns [priceBefore, priceAfter] - price before adding the coupon and after adding the coupon
    */
-  const checkProductCoupon = async (product) => {
+  const checkProductCoupon = async (product, coupon) => {
     const browser = await puppeteer.launch({
       headless: true,
       ignoreHTTPSErrors: true,
@@ -148,7 +159,7 @@ const Scrapper = (() => {
     if (productOutOfStockSelector) {
       const btnProductOutOfStock = await page.$(productOutOfStockSelector);
       if (btnProductOutOfStock) {
-        return [-1, -1];
+        return [-1, -1000];
       }
     }
 
@@ -172,7 +183,7 @@ const Scrapper = (() => {
 
     await couponInput.click();
     await couponInput.press('Backspace');
-    await couponInput.type(product.coupon, { delay: 10 });
+    await couponInput.type(coupon, { delay: 10 });
     await waitRandomTime(page, actionDelay);
 
     const priceTag = await page.$(priceTagSelector);
@@ -330,41 +341,73 @@ const Scrapper = (() => {
     return sortedProducts;
   };
 
-  return { scrapPages, checkProductCoupon, checkProductPrice };
+  const updateAllProductsFromDB = async () => {
+    console.log('Starting DB update...');
+    const products = await Product.find({}).populate('shop');
+    console.log(`Found products: ${products.length}`);
+
+    for (const product of products) {
+      console.log(`Scrapping product ${product.url} ...`);
+      await sleep(3000);
+      let newProductSnapshot;
+      const workingCoupons = [];
+      let minPrice = 999999999;
+
+      if (product.coupons.length > 0) {
+        for (const coupon of product.coupons) {
+          await sleep(5000);
+          const [priceBefore, priceAfter] = await checkProductCoupon(
+            {
+              name: product.name,
+              url: product.url,
+              shop: product.shop.name,
+            },
+            coupon
+          );
+          if (priceBefore !== priceAfter && priceAfter < minPrice) {
+            minPrice = priceAfter;
+            workingCoupons.push(coupon);
+          }
+        }
+        newProductSnapshot = {
+          price: minPrice,
+          coupons: workingCoupons,
+          otherPromotions: [],
+          updatedAt: Date.now(),
+        };
+      } else {
+        const price = await checkProductPrice({
+          url: product.url,
+          name: product.name,
+          shop: product.shop.name,
+        });
+
+        minPrice = price;
+
+        newProductSnapshot = {
+          price,
+          coupons: [],
+          otherPromotions: [],
+          updatedAt: Date.now(),
+        };
+      }
+
+      await Product.findByIdAndUpdate(product._id, {
+        price: minPrice === 999999999 ? product.price : minPrice,
+        coupons: workingCoupons,
+        $push: { snapshots: newProductSnapshot },
+      });
+
+      console.log('Added new snapshot');
+    }
+  };
+
+  return {
+    scrapPages,
+    checkProductCoupon,
+    checkProductPrice,
+    updateAllProductsFromDB,
+  };
 })();
 
 module.exports = Scrapper;
-// const { scrapPages } = Scrapper;
-
-// const { checkProductCoupon } = Scrapper;
-
-// const product = {
-//   url: 'https://mediamarkt.pl/telefony-i-smartfony/smartfon-samsung-galaxy-a52s-5g-6gb-128gb-czarny-sm-a528bzkdeue',
-//   coupon: '50za500KLUB',
-//   shop: 'mediamarkt',
-// };
-
-// const prod2 = {
-//   url: 'https://www.x-kom.pl/p/654050-telewizor-60-69-samsung-qe65qn90a.html',
-//   shop: 'xkom',
-//   coupon: 'prezent',
-// };
-
-// const prod3 = {
-//   url: 'https://www.mediaexpert.pl/agd-do-zabudowy/piekarniki-do-zabudowy/piekarnik-amica-ed37219x-x-type',
-//   shop: 'mediaexpert',
-//   coupon: 'HALLOWEEN',
-// };
-// const prod4 = {
-//   url: 'https://www.euro.com.pl/telewizory-led-lcd-plazmowe/panasonic-tx-55hz1000e-tv-oled.bhtml',
-//   shop: 'rtveuroagd',
-//   coupon: 'HD011121',
-// };
-// const prod5 = {
-//   url: 'https://www.morele.net/sluchawki-corsair-hs70-pro-wireless-ca-9011210-eu-6324974/',
-//   shop: 'morele',
-//   coupon: 'CORS21',
-// };
-
-// checkProductCoupon(prod5);
-// scrapPages(SITES_CONFIG.names, 3000, 20000, "macbook air M1 16gb");

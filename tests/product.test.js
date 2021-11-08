@@ -287,6 +287,36 @@ describe('/product route', () => {
     expect(response.body.data.products).not.toHaveLength(0);
   });
 
+  it('Should run scrapper for all shops', async () => {
+    const response = await request(app)
+      .get('/api/products/scrapper')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        minPrice: 3000,
+        maxPrice: 6000,
+        productName: 'iphone 12 pro',
+        categoryId,
+        shops,
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(response.body).toHaveProperty('data');
+    expect(response.body.data).toHaveProperty('products');
+    expect(response.body.data.products).not.toHaveLength(0);
+
+    const res = await request(app)
+      .get('/api/products?page=1&limit=10&price[gte]=3000&price[lte]=6000')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'iphone 12 pro',
+      });
+
+    expect(res.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('products');
+    expect(res.body.data.products).toHaveLength(10);
+  });
+
   it('Should throw ValidationError', async () => {
     const response = await request(app)
       .post('/api/products')

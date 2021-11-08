@@ -5,6 +5,8 @@ const productSchema = mongoose.Schema({
   url: {
     type: String,
     required: true,
+    unique: true,
+    createIndex: true,
     validate: validator.isURL,
   },
   name: {
@@ -44,6 +46,32 @@ const productSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  snapshots: [
+    {
+      coupons: [String],
+      otherPromotions: [
+        {
+          name: {
+            type: String,
+            trim: true,
+          },
+          url: {
+            type: String,
+            validate: validator.isURL,
+          },
+        },
+      ],
+      price: {
+        type: Number,
+        required: true,
+      },
+      updatedAt: {
+        type: Date,
+        default: Date.now(),
+      },
+      default: [],
+    },
+  ],
 });
 
 const Product = mongoose.model('Product', productSchema);

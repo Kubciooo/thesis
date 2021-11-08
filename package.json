@@ -43,6 +43,7 @@
     "validator": "^13.6.0"
   },
   "devDependencies": {
+    "arkit": "^1.6.4",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",

@@ -35,14 +35,24 @@ const ProductPromotionController = (() => {
     }
 
     if (productPromotion.type === 'COUPON' && !req.body.userValidation) {
-      const [productPriceBefore, productPriceAfter] = await checkProductCoupon({
-        url: product.url,
-        shop: product.shop.name,
-        coupon: productPromotion.coupon,
-      });
+      const [productPriceBefore, productPriceAfter] = await checkProductCoupon(
+        {
+          url: product.url,
+          shop: product.shop.name,
+        },
+        productPromotion.coupon
+      );
       if (productPriceBefore !== productPriceAfter) {
+        const newSnapshot = {
+          coupons: product.coupons.concat([productPromotion.coupon]),
+          price: productPriceAfter,
+          otherPromotions: product.otherPromotions,
+          updatedAt: Date.now(),
+        };
         product.coupons.push(productPromotion.coupon);
         product.price = Math.min(product.price, productPriceAfter);
+        product.snapshots.push(newSnapshot);
+
         await product.save();
         res.status(HTTP_STATUS_CODES.OK_POST).json({
           status: HTTP_STATUS_MESSAGES.OK,
