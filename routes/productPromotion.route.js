@@ -10,6 +10,8 @@ productPromotionRouter
 
 productPromotionRouter
   .route('/:id')
-  .get(ProductPromotionController.getProductPromotionsByProductId);
+  .get(ProductPromotionController.getProductPromotionsByProductId)
+  .patch(ProductPromotionController.followProductPromotionById)
+  .delete(ProductPromotionController.unfollowProductPromotionById);
 
 module.exports = productPromotionRouter;

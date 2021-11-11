@@ -33,6 +33,20 @@ const userSchema = mongoose.Schema({
       default: [],
     },
   ],
+  productPromotions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ProductPromotion',
+      default: [],
+    },
+  ],
+  shopPromotions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ShopPromotion',
+      default: [],
+    },
+  ],
   password: {
     type: String,
     required: true,

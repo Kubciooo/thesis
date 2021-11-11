@@ -3,19 +3,103 @@ const tryCatch = require('../utils/tryCatch.util');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const Product = require('../models/product.model');
+const User = require('../models/user.model');
 const ProductPromotion = require('../models/productPromotion.model');
 const { checkProductCoupon } = require('../services/scrapper.service');
 
 const ProductPromotionController = (() => {
   const getAllProductPromotions = tryCatch(async (req, res, next) => {
-    const productPromotions = await ProductPromotion.find(req.query).sort(
-      '-expiresAt'
-    );
+    const productPromotions = await ProductPromotion.find(req.query)
+      .sort('-expiresAt')
+      .populate('product');
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: 'Success',
       data: {
         productPromotions,
+      },
+    });
+  });
+
+  const followProductPromotionById = tryCatch(async (req, res, next) => {
+    const { user } = req;
+    const promotionId = req.params.id;
+
+    const product = await ProductPromotion.findById(promotionId);
+    if (!product) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `ProductPromotion with id ${promotionId} doesn't exist`
+        )
+      );
+    }
+    if (!user.products.includes(product._id)) {
+      user.products.push(product._id);
+    }
+    await user.save();
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        user,
+      },
+    });
+  });
+
+  const unfollowProductPromotionById = tryCatch(async (req, res, next) => {
+    const promotionId = req.params.id;
+
+    const product = await ProductPromotion.findById(promotionId);
+    if (!product) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `ProductPromotion with id ${promotionId} doesn't exist`
+        )
+      );
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $pull: { products: product._id },
+      },
+      {
+        new: true,
+      }
+    );
+
+    req.user = user;
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        user,
+      },
+    });
+  });
+
+  const getAllFollowedProductPromotions = tryCatch(async (req, res, next) => {
+    const user = await User.findById(req.user._id).populate(
+      'productPromotions'
+    );
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
+
+    res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        productPromotions: user.productPromotions,
       },
     });
   });
@@ -135,6 +219,9 @@ const ProductPromotionController = (() => {
     createProductPromotion,
     getProductPromotionsByProductId,
     getProductPromotionsByProductUrl,
+    followProductPromotionById,
+    unfollowProductPromotionById,
+    getAllFollowedProductPromotions,
   };
 })();
 

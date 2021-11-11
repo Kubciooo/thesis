@@ -33,6 +33,10 @@ const productPromotionSchema = mongoose.Schema({
       return this.type === 'COUPON';
     },
   },
+  rating: {
+    type: Number,
+    default: 0,
+  },
   percentage: {
     type: Number,
     required: function () {

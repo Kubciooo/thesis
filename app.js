@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const ErrorController = require('./controllers/error.controller');
 const AuthorizationMiddleware = require('./middlewares/authorization.middleware');
 const categoryRouter = require('./routes/category.route');
@@ -12,6 +13,7 @@ const productPromotionRouter = require('./routes/productPromotion.route');
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
