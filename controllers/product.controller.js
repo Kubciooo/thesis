@@ -99,7 +99,7 @@ const ProductController = (() => {
     let products = Product.find().populate('shop');
 
     const queryObj = { ...req.query };
-    const excludedFields = ['page', 'limit'];
+    const excludedFields = ['page', 'limit', 'name'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
     let queryStr = JSON.stringify(queryObj);
@@ -115,11 +115,12 @@ const ProductController = (() => {
 
     let productsData = await products;
 
-    if (req.body.name) {
+    if (req.query.name) {
+      const productName = req.query.name.replace(/%20/g, ' ');
       productsData = productsData.filter((product) => {
         const { separator } = SITES_CONFIG[product.shop.name];
         const productSlug = getSlug(product.name, separator);
-        const searchSlug = getSlug(req.body.name, separator);
+        const searchSlug = getSlug(productName, separator);
 
         return isProductSlugIncluded(searchSlug, productSlug, separator);
       });

@@ -25,8 +25,8 @@ const ProductPromotionController = (() => {
     const { user } = req;
     const promotionId = req.params.id;
 
-    const product = await ProductPromotion.findById(promotionId);
-    if (!product) {
+    const promotion = await ProductPromotion.findById(promotionId);
+    if (!promotion) {
       return next(
         new AppError(
           'NotFoundError',
@@ -35,8 +35,9 @@ const ProductPromotionController = (() => {
         )
       );
     }
-    if (!user.productPromotions.includes(product._id)) {
-      user.productPromotions.push(product._id);
+    if (!user.productPromotions.includes(promotion._id)) {
+      await promotion.update({ rating: promotion.rating + 1 });
+      user.productPromotions.push(promotion._id);
     } else {
       return next(
         new AppError(
@@ -79,6 +80,7 @@ const ProductPromotionController = (() => {
         new: true,
       }
     );
+    await productPromotion.update({ rating: productPromotion.rating - 1 });
 
     req.user = user;
     res.status(HTTP_STATUS_CODES.OK).json({
