@@ -35,8 +35,16 @@ const ProductPromotionController = (() => {
         )
       );
     }
-    if (!user.products.includes(product._id)) {
-      user.products.push(product._id);
+    if (!user.productPromotions.includes(product._id)) {
+      user.productPromotions.push(product._id);
+    } else {
+      return next(
+        new AppError(
+          'BadRequestError',
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          `User with id ${user._id} already follows ProductPromotion with id ${promotionId}`
+        )
+      );
     }
     await user.save();
 
@@ -51,8 +59,8 @@ const ProductPromotionController = (() => {
   const unfollowProductPromotionById = tryCatch(async (req, res, next) => {
     const promotionId = req.params.id;
 
-    const product = await ProductPromotion.findById(promotionId);
-    if (!product) {
+    const productPromotion = await ProductPromotion.findById(promotionId);
+    if (!productPromotion) {
       return next(
         new AppError(
           'NotFoundError',
@@ -65,7 +73,7 @@ const ProductPromotionController = (() => {
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {
-        $pull: { products: product._id },
+        $pull: { productPromotions: productPromotion._id },
       },
       {
         new: true,
@@ -82,9 +90,14 @@ const ProductPromotionController = (() => {
   });
 
   const getAllFollowedProductPromotions = tryCatch(async (req, res, next) => {
-    const user = await User.findById(req.user._id).populate(
-      'productPromotions'
-    );
+    const user = await User.findById(req.user._id).populate({
+      path: 'productPromotions',
+      model: 'ProductPromotion',
+      populate: {
+        path: 'product',
+        model: 'Product',
+      },
+    });
 
     if (!user) {
       return next(
