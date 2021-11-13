@@ -33,7 +33,6 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.11",
     "morgan": "^1.10.0",
-    "n": "^8.0.0",
     "nodemailer": "^6.7.0",
     "promisify": "^0.0.3",
     "puppeteer": "^10.4.0",

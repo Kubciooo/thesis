@@ -61,6 +61,13 @@ const userSchema = mongoose.Schema({
   passwordForgotTokenExpiration: {
     type: Date,
   },
+  userProducts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'UserProduct',
+      default: [],
+    },
+  ],
 });
 
 userSchema.pre('save', async function (next) {
