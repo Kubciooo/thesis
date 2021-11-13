@@ -108,13 +108,17 @@ const ProductController = (() => {
     products = products.find(JSON.parse(queryStr));
 
     const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
+    const limit = req.query.limit * 1 || 500;
     const skip = (page - 1) * limit;
 
     products = products.skip(skip).limit(limit);
 
     let productsData = await products;
 
+    console.dir(
+      productsData.map((el) => el.name),
+      { depth: null }
+    );
     if (req.query.name) {
       const productName = req.query.name.replace(/%20/g, ' ');
       productsData = productsData.filter((product) => {
