@@ -14,6 +14,10 @@ const UserProductsController = (() => {
       populate: {
         path: 'products',
         model: 'Product',
+        populate: {
+          path: 'shop',
+          model: 'Shop',
+        },
       },
     });
 
@@ -102,7 +106,14 @@ const UserProductsController = (() => {
       {
         new: true,
       }
-    );
+    ).populate({
+      path: 'products',
+      model: 'Product',
+      populate: {
+        path: 'shop',
+        model: 'Shop',
+      },
+    });
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,
@@ -113,7 +124,14 @@ const UserProductsController = (() => {
   });
 
   const createUserProducts = tryCatch(async (req, res, next) => {
-    const userProducts = await UserProducts.create(req.body);
+    const userProducts = await UserProducts.create(req.body).populate({
+      path: 'products',
+      model: 'Product',
+      populate: {
+        path: 'shop',
+        model: 'Shop',
+      },
+    });
 
     const user = await User.findById(req.user._id);
     user.userProducts.push(userProducts);
@@ -128,7 +146,14 @@ const UserProductsController = (() => {
   });
 
   const addProductToUserProducts = tryCatch(async (req, res, next) => {
-    const userProducts = await UserProducts.findById(req.params.id);
+    const userProducts = await UserProducts.findById(req.params.id).populate({
+      path: 'products',
+      model: 'Product',
+      populate: {
+        path: 'shop',
+        model: 'Shop',
+      },
+    });
     if (!userProducts) {
       return next(
         new AppError(

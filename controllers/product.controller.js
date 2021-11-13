@@ -231,7 +231,14 @@ const ProductController = (() => {
   });
 
   const getAllFollowedProducts = tryCatch(async (req, res, next) => {
-    const user = await User.findById(req.user._id).populate('products');
+    const user = await User.findById(req.user._id).populate({
+      path: 'products',
+      model: 'Product',
+      populate: {
+        path: 'shop',
+        model: 'Shop',
+      },
+    });
 
     if (!user) {
       return next(
