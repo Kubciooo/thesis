@@ -91,28 +91,41 @@ const Scrapper = (() => {
         '--blink-settings=imagesEnabled=true',
       ],
     });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1400, height: 900 });
-    await page.goto(product.url, {
-      waitUntil: 'domcontentloaded',
-    });
-    await waitRandomTime(page, 1000);
-    const shopOptions = SITES_CONFIG[product.shop].productSelectors;
-    const { priceTagFormatter } = SITES_CONFIG[product.shop];
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 1400, height: 900 });
+      await page.goto(product.url, {
+        waitUntil: 'domcontentloaded',
+      });
+      await waitRandomTime(page, 1000);
+      const shopOptions = SITES_CONFIG[product.shop].productSelectors;
+      const { priceTagFormatter } = SITES_CONFIG[product.shop];
 
-    const { startingPriceSelector } = shopOptions;
-    const startingPrice = await page.$eval(
-      startingPriceSelector,
-      (el) => el.innerText
-    );
+      const { startingPriceSelector, productOutOfStockSelector } = shopOptions;
 
-    let price = -1;
-    if (startingPrice) {
-      price = formatString(startingPrice, priceTagFormatter);
+      if (productOutOfStockSelector) {
+        const btnProductOutOfStock = await page.$(productOutOfStockSelector);
+        if (btnProductOutOfStock) {
+          return 0;
+        }
+      }
+      const startingPrice = await page.$eval(
+        startingPriceSelector,
+        (el) => el.innerText
+      );
+
+      let price = 0;
+      if (startingPrice) {
+        price = formatString(startingPrice, priceTagFormatter);
+      }
+
+      browser.close();
+      return price;
+    } catch (err) {
+      console.log(err);
+      browser.close();
+      return 0;
     }
-
-    browser.close();
-    return price;
   };
 
   /**
@@ -133,84 +146,92 @@ const Scrapper = (() => {
         '--blink-settings=imagesEnabled=true',
       ],
     });
-    const page = await browser.newPage();
-    const shopOptions = SITES_CONFIG[product.shop].productSelectors;
-    const actionDelay = SITES_CONFIG[product.shop].actionsDelay;
-    const { priceTagFormatter } = SITES_CONFIG[product.shop];
+    try {
+      const page = await browser.newPage();
+      const shopOptions = SITES_CONFIG[product.shop].productSelectors;
+      const actionDelay = SITES_CONFIG[product.shop].actionsDelay;
+      const { priceTagFormatter } = SITES_CONFIG[product.shop];
 
-    const {
-      addToBasketButtonSelector,
-      productOutOfStockSelector,
-      additionalBasketSelectors,
-      couponInputSelector,
-      couponActivateSelector,
-      priceTagSelector,
-    } = shopOptions;
+      const {
+        addToBasketButtonSelector,
+        productOutOfStockSelector,
+        additionalBasketSelectors,
+        couponInputSelector,
+        couponActivateSelector,
+        priceTagSelector,
+      } = shopOptions;
 
-    page.setDefaultNavigationTimeout(60000);
-    await page.setViewport({
-      width: 1400,
-      height: 900,
-    });
-    await page.goto(product.url, { waitUntil: 'networkidle2' });
+      page.setDefaultNavigationTimeout(60000);
+      await page.setViewport({
+        width: 1400,
+        height: 900,
+      });
+      await page.goto(product.url, { waitUntil: 'networkidle2' });
 
-    await page.waitForSelector('body');
+      await page.waitForSelector('body');
 
-    if (productOutOfStockSelector) {
-      const btnProductOutOfStock = await page.$(productOutOfStockSelector);
-      if (btnProductOutOfStock) {
-        return [-1, -1000];
+      if (productOutOfStockSelector) {
+        const btnProductOutOfStock = await page.$(productOutOfStockSelector);
+        if (btnProductOutOfStock) {
+          return [0, 0];
+        }
       }
-    }
 
-    await page.waitForSelector(addToBasketButtonSelector);
-    await waitRandomTime(page, actionDelay);
-
-    const btn = await page.$(addToBasketButtonSelector);
-
-    await btn.evaluate((el) => el.click());
-
-    for (const basketSelector of additionalBasketSelectors) {
+      await page.waitForSelector(addToBasketButtonSelector);
       await waitRandomTime(page, actionDelay);
-      await page.waitForSelector(basketSelector);
-      await page.$eval(basketSelector, (el) => el.click());
+
+      const btn = await page.$(addToBasketButtonSelector);
+
+      await btn.evaluate((el) => el.click());
+
+      for (const basketSelector of additionalBasketSelectors) {
+        await waitRandomTime(page, actionDelay);
+        await page.waitForSelector(basketSelector);
+        await page.$eval(basketSelector, (el) => el.click());
+      }
+
+      await page.waitForSelector(couponInputSelector);
+      await waitRandomTime(page, actionDelay);
+
+      const couponInput = await page.$(couponInputSelector);
+
+      await couponInput.click();
+      await couponInput.press('Backspace');
+      await couponInput.type(coupon, { delay: 10 });
+      await waitRandomTime(page, actionDelay);
+
+      const priceTag = await page.$(priceTagSelector);
+      const priceTagBefore = await priceTag.evaluate(
+        (price) => price.innerText
+      );
+      await waitRandomTime(page, actionDelay);
+
+      await page.$eval(couponActivateSelector, (el) => el.click(), {
+        waitUntil: 'domcontentloaded',
+      });
+      await page.waitForSelector('body');
+      await page.waitForSelector(priceTagSelector);
+      await page.waitForTimeout(5 * actionDelay);
+
+      const priceTagAfter = await page.$eval(
+        priceTagSelector,
+        (price) => price.innerText
+      );
+
+      const priceBefore = parseFloat(
+        formatString(priceTagBefore, priceTagFormatter)
+      );
+      const priceAfter = parseFloat(
+        formatString(priceTagAfter, priceTagFormatter)
+      );
+
+      await browser.close();
+      return [priceBefore, priceAfter];
+    } catch (err) {
+      console.log(err);
+      browser.close();
+      return [0, 0];
     }
-
-    await page.waitForSelector(couponInputSelector);
-    await waitRandomTime(page, actionDelay);
-
-    const couponInput = await page.$(couponInputSelector);
-
-    await couponInput.click();
-    await couponInput.press('Backspace');
-    await couponInput.type(coupon, { delay: 10 });
-    await waitRandomTime(page, actionDelay);
-
-    const priceTag = await page.$(priceTagSelector);
-    const priceTagBefore = await priceTag.evaluate((price) => price.innerText);
-    await waitRandomTime(page, actionDelay);
-
-    await page.$eval(couponActivateSelector, (el) => el.click(), {
-      waitUntil: 'domcontentloaded',
-    });
-    await page.waitForSelector('body');
-    await page.waitForSelector(priceTagSelector);
-    await page.waitForTimeout(5 * actionDelay);
-
-    const priceTagAfter = await page.$eval(
-      priceTagSelector,
-      (price) => price.innerText
-    );
-
-    const priceBefore = parseFloat(
-      formatString(priceTagBefore, priceTagFormatter)
-    );
-    const priceAfter = parseFloat(
-      formatString(priceTagAfter, priceTagFormatter)
-    );
-
-    await browser.close();
-    return [priceBefore, priceAfter];
   };
 
   const scrapPages = async (shops, priceMin, priceMax, productName) => {
@@ -313,6 +334,7 @@ const Scrapper = (() => {
         return candidateProducts;
       } catch (err) {
         console.log(err);
+        await page.close();
         return new AppError(
           'ScrapperError',
           HTTP_STATUS_CODES.INTERNAL_SERVER,
@@ -360,17 +382,21 @@ const Scrapper = (() => {
       if (product.coupons.length > 0) {
         for (const coupon of product.coupons) {
           await sleep(5000);
-          const [priceBefore, priceAfter] = await checkProductCoupon(
-            {
-              name: product.name,
-              url: product.url,
-              shop: product.shop.name,
-            },
-            coupon
-          );
-          if (priceBefore !== priceAfter && priceAfter < minPrice) {
-            minPrice = priceAfter;
-            workingCoupons.push(coupon);
+          try {
+            const [priceBefore, priceAfter] = await checkProductCoupon(
+              {
+                name: product.name,
+                url: product.url,
+                shop: product.shop.name,
+              },
+              coupon
+            );
+            if (priceBefore !== priceAfter && priceAfter < minPrice) {
+              minPrice = priceAfter;
+              workingCoupons.push(coupon);
+            }
+          } catch (error) {
+            console.log(error);
           }
         }
         newProductSnapshot = {
@@ -380,20 +406,30 @@ const Scrapper = (() => {
           updatedAt: Date.now(),
         };
       } else {
-        const price = await checkProductPrice({
-          url: product.url,
-          name: product.name,
-          shop: product.shop.name,
-        });
+        try {
+          const price = await checkProductPrice({
+            url: product.url,
+            name: product.name,
+            shop: product.shop.name,
+          });
 
-        minPrice = price;
+          minPrice = price;
 
-        newProductSnapshot = {
-          price,
-          coupons: [],
-          otherPromotions: [],
-          updatedAt: Date.now(),
-        };
+          newProductSnapshot = {
+            price,
+            coupons: [],
+            otherPromotions: [],
+            updatedAt: Date.now(),
+          };
+        } catch (err) {
+          console.log(err);
+          newProductSnapshot = {
+            price: product.price,
+            coupons: [],
+            otherPromotions: [],
+            updatedAt: Date.now(),
+          };
+        }
       }
 
       await Product.findByIdAndUpdate(product._id, {

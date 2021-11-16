@@ -7,6 +7,83 @@ const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const Product = require('../models/product.model');
 
 const UserProductsController = (() => {
+  const addFavouriteUserProducts = tryCatch(async (req, res, next) => {
+    const { folderId } = req.body;
+    const userId = req.user._id;
+    const folder = await UserProducts.findById(folderId).populate({
+      path: 'products',
+      model: 'Product',
+      populate: {
+        path: 'shop',
+        model: 'Shop',
+      },
+    });
+
+    if (!folder) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Folder with id ${folderId} doesn't exist`
+        )
+      );
+    }
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
+    user.favouriteUserProducts = folder._id;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(HTTP_STATUS_CODES.OK_POST).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        favouriteUserProducts: folder,
+      },
+    });
+  });
+
+  const getFavouriteUserProducts = tryCatch(async (req, res, next) => {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).populate({
+      path: 'favouriteUserProducts',
+      model: 'UserProduct',
+      populate: {
+        path: 'products',
+        model: 'Product',
+        populate: {
+          path: 'shop',
+          model: 'Shop',
+        },
+      },
+    });
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      data: {
+        favouriteUserProducts: user.favouriteUserProducts,
+      },
+    });
+  });
+
   const getAllUserProducts = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).populate({
       path: 'userProducts',
@@ -124,7 +201,8 @@ const UserProductsController = (() => {
   });
 
   const createUserProducts = tryCatch(async (req, res, next) => {
-    const userProducts = await UserProducts.create(req.body).populate({
+    let userProducts = await UserProducts.create(req.body);
+    userProducts = await userProducts.populate({
       path: 'products',
       model: 'Product',
       populate: {
@@ -192,6 +270,8 @@ const UserProductsController = (() => {
     getAllUserProducts,
     createUserProducts,
     addProductToUserProducts,
+    addFavouriteUserProducts,
+    getFavouriteUserProducts,
     deleteUserProducts,
     deleteProductFromUserProducts,
   };

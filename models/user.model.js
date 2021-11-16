@@ -10,10 +10,12 @@ const userSchema = mongoose.Schema({
   login: {
     type: String,
     unique: true,
+    trim: true,
     required: true,
   },
   email: {
     type: String,
+    trim: true,
     required: true,
     unique: true,
     validate: validator.isEmail,
@@ -37,6 +39,18 @@ const userSchema = mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ProductPromotion',
+      default: [],
+    },
+  ],
+  favouriteProduct: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    default: [],
+  },
+  blockedShops: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Shop',
       default: [],
     },
   ],
@@ -68,6 +82,10 @@ const userSchema = mongoose.Schema({
       default: [],
     },
   ],
+  favouriteUserProducts: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'UserProduct',
+  },
 });
 
 userSchema.pre('save', async function (next) {

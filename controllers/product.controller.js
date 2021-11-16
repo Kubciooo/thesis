@@ -14,6 +14,72 @@ const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const SITES_CONFIG = require('../constants/sites');
 
 const ProductController = (() => {
+  const addFavouriteProduct = tryCatch(async (req, res, next) => {
+    const { productId } = req.body;
+    const userId = req.user._id;
+    const product = await Product.findById(productId).populate('shop');
+    if (!product) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `Product with id ${req.params.id} doesn't exist`
+        )
+      );
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
+    user.favouriteProduct = product._id;
+
+    await user.save();
+    return res.status(HTTP_STATUS_CODES.OK_POST).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        favouriteProduct: product,
+      },
+    });
+  });
+
+  const getFavouriteProduct = tryCatch(async (req, res, next) => {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).populate({
+      path: 'favouriteProduct',
+      model: 'Product',
+      populate: {
+        path: 'shop',
+        model: 'Shop',
+      },
+    });
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      data: {
+        favouriteProduct: user.favouriteProduct,
+      },
+    });
+  });
+
   const addProductsFromScrapper = tryCatch(async (req, res, next) => {
     /**
      * @todo use https://express-validator.github.io/docs/index.html
@@ -265,6 +331,8 @@ const ProductController = (() => {
     addProductsFromScrapper,
     followProductById,
     unfollowProductById,
+    addFavouriteProduct,
+    getFavouriteProduct,
     getAllFollowedProducts,
   };
 })();

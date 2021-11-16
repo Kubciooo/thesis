@@ -3,7 +3,7 @@ const SITES_CONFIG = {
 
   mediamarkt: {
     name: 'mediamarkt',
-    actionsDelay: 7000,
+    actionsDelay: 2000,
     separator: '+',
     priceTagFormatter: {
       ',-': '',
@@ -19,6 +19,7 @@ const SITES_CONFIG = {
     },
     productSelectors: {
       startingPriceSelector: '.main-price.is-big',
+      productOutOfStockSelector: '.offer-unavailable',
       addToBasketButtonSelector:
         '.spark-button.add-button.is-primary.is-medium.icon-left.show-price-button',
       additionalBasketSelectors: [
@@ -123,6 +124,7 @@ const SITES_CONFIG = {
         'button[title="Usuń kod rabatowy"]',
       ],
       couponInputSelector: '#voucherInput',
+      productOutOfStockSelector: '.delivery-message.delivery-unavailable',
       couponActivateSelector: 'button[title="Zastosuj kod rabatowy"]',
       priceTagSelector: '.summary-value.selenium-O-total-price',
     },

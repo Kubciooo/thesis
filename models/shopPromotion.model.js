@@ -29,6 +29,7 @@ const shopPromotionSchema = mongoose.Schema({
     },
   },
   coupon: {
+    trim: true,
     type: String,
     required: function () {
       return this.type === 'COUPON';

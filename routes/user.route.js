@@ -3,6 +3,7 @@ const ProductPromotionController = require('../controllers/productPromotion.cont
 const ProductController = require('../controllers/product.controller');
 const UserController = require('../controllers/user.controller');
 const AuthorizationMiddleware = require('../middlewares/authorization.middleware');
+const UserProductsController = require('../controllers/userProducts.controller');
 
 const userRouter = express.Router();
 
@@ -25,5 +26,24 @@ userRouter
   .get(
     AuthorizationMiddleware.authorize,
     ProductPromotionController.getAllFollowedProductPromotions
+  );
+
+userRouter
+  .route('/favourites/product')
+  .get(AuthorizationMiddleware.authorize, ProductController.getFavouriteProduct)
+  .post(
+    AuthorizationMiddleware.authorize,
+    ProductController.addFavouriteProduct
+  );
+
+userRouter
+  .route('/favourites/folder')
+  .get(
+    AuthorizationMiddleware.authorize,
+    UserProductsController.getFavouriteUserProducts
+  )
+  .post(
+    AuthorizationMiddleware.authorize,
+    UserProductsController.addFavouriteUserProducts
   );
 module.exports = userRouter;
