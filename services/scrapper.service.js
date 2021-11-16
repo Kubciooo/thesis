@@ -79,7 +79,7 @@ const Scrapper = (() => {
 
   const checkProductPrice = async (product) => {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -106,6 +106,8 @@ const Scrapper = (() => {
       if (productOutOfStockSelector) {
         const btnProductOutOfStock = await page.$(productOutOfStockSelector);
         if (btnProductOutOfStock) {
+          await page.close();
+          await browser.close();
           return 0;
         }
       }
@@ -118,12 +120,12 @@ const Scrapper = (() => {
       if (startingPrice) {
         price = formatString(startingPrice, priceTagFormatter);
       }
-
-      browser.close();
+      await page.close();
+      await browser.close();
       return price;
     } catch (err) {
       console.log(err);
-      browser.close();
+      await browser.close();
       return 0;
     }
   };
@@ -134,7 +136,7 @@ const Scrapper = (() => {
    */
   const checkProductCoupon = async (product, coupon) => {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -173,6 +175,8 @@ const Scrapper = (() => {
       if (productOutOfStockSelector) {
         const btnProductOutOfStock = await page.$(productOutOfStockSelector);
         if (btnProductOutOfStock) {
+          await page.close();
+          await browser.close();
           return [0, 0];
         }
       }
@@ -229,7 +233,7 @@ const Scrapper = (() => {
       return [priceBefore, priceAfter];
     } catch (err) {
       console.log(err);
-      browser.close();
+      await browser.close();
       return [0, 0];
     }
   };
@@ -374,7 +378,7 @@ const Scrapper = (() => {
 
     for (const product of products) {
       console.log(`Scrapping product ${product.url} ...`);
-      await sleep(3000);
+      await sleep(5000);
       let newProductSnapshot;
       const workingCoupons = [];
       let minPrice = 999999999;
