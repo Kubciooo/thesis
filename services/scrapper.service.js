@@ -253,9 +253,9 @@ const Scrapper = (() => {
       ],
     });
 
-    const scrapSinglePage = async (shopName, shopId, shopCategory) => {
+    const scrapSinglePage = async (bw, shopName, shopId, shopCategory) => {
       const candidateProducts = [];
-      const page = await browser.newPage();
+      const page = await bw.newPage();
 
       page.setDefaultNavigationTimeout(60000);
       await page.setViewport({
@@ -324,14 +324,16 @@ const Scrapper = (() => {
                 )
               : [];
 
-            candidateProducts.push({
-              shop: shopId,
-              categories: [shopCategory],
-              name,
-              price,
-              url,
-              otherPromotions: promotions,
-            });
+            if (url) {
+              candidateProducts.push({
+                shop: shopId,
+                categories: [shopCategory],
+                name,
+                price,
+                url,
+                otherPromotions: promotions,
+              });
+            }
           }
         }
         await page.close();
@@ -349,8 +351,19 @@ const Scrapper = (() => {
 
     const shopsPromisesArray = shops.map(
       (shop) =>
-        new Promise((resolve) =>
-          resolve(scrapSinglePage(shop.name, shop.id, shop.category))
+        new Promise(
+          (resolve) =>
+            resolve(
+              scrapSinglePage(browser, shop.name, shop.id, shop.category)
+            ),
+          (reject) =>
+            reject(
+              new AppError(
+                'ScrapperError',
+                HTTP_STATUS_CODES.INTERNAL_SERVER,
+                `The scrapper got some issues while parsing ${shop.name} with ${shop.name}!`
+              )
+            )
         )
     );
     const arrayOfShopsArrays = await Promise.all(shopsPromisesArray);
@@ -404,7 +417,7 @@ const Scrapper = (() => {
           }
         }
         newProductSnapshot = {
-          price: minPrice,
+          price: minPrice === 999999999 ? 0 : minPrice,
           coupons: workingCoupons,
           otherPromotions: [],
           updatedAt: Date.now(),
@@ -428,21 +441,23 @@ const Scrapper = (() => {
         } catch (err) {
           console.log(err);
           newProductSnapshot = {
-            price: product.price,
+            price: 0,
             coupons: [],
             otherPromotions: [],
             updatedAt: Date.now(),
           };
         }
       }
-
-      await Product.findByIdAndUpdate(product._id, {
-        price: minPrice === 999999999 ? product.price : minPrice,
-        coupons: workingCoupons,
-        $push: { snapshots: newProductSnapshot },
-      });
-
-      console.log('Added new snapshot');
+      if (newProductSnapshot.price !== 0) {
+        await Product.findByIdAndUpdate(product._id, {
+          price: minPrice === 999999999 ? product.price : minPrice,
+          coupons: workingCoupons,
+          $push: { snapshots: newProductSnapshot },
+        });
+        console.log('Added new snapshot');
+      } else {
+        console.log('No snapshot added - product unavailable');
+      }
     }
   };
 

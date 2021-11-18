@@ -15,7 +15,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    updateAllProductsFromDB();
+    // updateAllProductsFromDB();
     setInterval(updateAllProductsFromDB, milisecondsFromHours(1));
   });
 

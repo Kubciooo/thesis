@@ -137,6 +137,8 @@ const ProductController = (() => {
       }
     }
 
+    console.log('scrapping data...');
+
     const scrapData = await Scrapper.scrapPages(
       shopsNames,
       parseFloat(minPrice),
@@ -181,10 +183,6 @@ const ProductController = (() => {
 
     let productsData = await products;
 
-    console.dir(
-      productsData.map((el) => el.name),
-      { depth: null }
-    );
     if (req.query.name) {
       const productName = req.query.name.replace(/%20/g, ' ');
       productsData = productsData.filter((product) => {
