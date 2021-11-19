@@ -25,6 +25,7 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Shop',
       default: [],
+      required: true,
     },
   ],
 
@@ -33,6 +34,7 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
       default: [],
+      required: true,
     },
   ],
   productPromotions: [
@@ -40,18 +42,21 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ProductPromotion',
       default: [],
+      required: true,
     },
   ],
   favouriteProduct: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
-    default: [],
+    default: null,
+    select: true,
   },
   blockedShops: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Shop',
       default: [],
+      required: true,
     },
   ],
   shopPromotions: [
@@ -59,6 +64,7 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ShopPromotion',
       default: [],
+      required: true,
     },
   ],
   password: {
@@ -85,6 +91,12 @@ const userSchema = mongoose.Schema({
   favouriteUserProducts: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserProduct',
+    select: true,
+  },
+  userFavouritesMinUsers: {
+    type: Number,
+    default: 0,
+    required: true,
   },
 });
 
@@ -121,10 +133,5 @@ userSchema.methods.forgotPasswordToken = async function () {
 };
 
 const User = mongoose.model('Users', userSchema);
-
-// const user = await User.findById()
-// user.shops.push(shopID) <- użyj tego jeżeli chcesz dodać do użytkownika 'user' sklep o id shopID
-// user.shops = user.shops.filter(id => id !== shopID); <- a tego użyj jak chcesz usunąć ten sklep
-// await user.save({validateBeforeSave: false});
 
 module.exports = User;

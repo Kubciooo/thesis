@@ -449,12 +449,25 @@ const Scrapper = (() => {
         }
       }
       if (newProductSnapshot.price !== 0) {
-        await Product.findByIdAndUpdate(product._id, {
-          price: minPrice === 999999999 ? product.price : minPrice,
-          coupons: workingCoupons,
-          $push: { snapshots: newProductSnapshot },
-        });
-        console.log('Added new snapshot');
+        try {
+          await Product.findByIdAndUpdate(product._id, {
+            price: minPrice === 999999999 ? product.price : minPrice,
+            coupons: workingCoupons,
+            $push: { snapshots: newProductSnapshot },
+          });
+          console.log('Added new snapshot');
+        } catch (err) {
+          console.log(
+            '_________________________________________________________________'
+          );
+          console.log('There was a problem during creating a snapshot...');
+          console.log(err);
+          console.log('\nsnapshot:');
+          console.log(newProductSnapshot);
+          console.log(
+            '_________________________________________________________________'
+          );
+        }
       } else {
         console.log('No snapshot added - product unavailable');
       }

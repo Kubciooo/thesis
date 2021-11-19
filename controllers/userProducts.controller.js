@@ -28,7 +28,9 @@ const UserProductsController = (() => {
         )
       );
     }
-    const user = await User.findById(userId);
+    const user = await User.findByIdAndUpdate(userId, {
+      favouriteUserProducts: folder._id,
+    });
 
     if (!user) {
       return next(
@@ -39,8 +41,7 @@ const UserProductsController = (() => {
         )
       );
     }
-    user.favouriteUserProducts = folder._id;
-    await user.save({ validateBeforeSave: false });
+    req.user = user;
 
     return res.status(HTTP_STATUS_CODES.OK_POST).json({
       message: HTTP_STATUS_MESSAGES.OK,
@@ -211,9 +212,11 @@ const UserProductsController = (() => {
       },
     });
 
-    const user = await User.findById(req.user._id);
-    user.userProducts.push(userProducts);
-    await user.save();
+    const user = await User.findByIdAndUpdate(req.user._id, {
+      $push: { userProducts: userProducts._id },
+    });
+
+    req.user = user;
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,

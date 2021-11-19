@@ -10,6 +10,7 @@ const Emails = require('../utils/emails.util');
 
 const UserController = (() => {
   const signup = tryCatch(async (req, res, next) => {
+    console.log(req.body);
     if (req.body.password !== req.body.retypePassword) {
       return next(
         new AppError(
@@ -26,7 +27,6 @@ const UserController = (() => {
       email: req.body.email,
       password: req.body.password,
     });
-
     const newUser = await user.save();
 
     const token = jwt.sign(
@@ -207,7 +207,62 @@ const UserController = (() => {
     });
   });
 
-  return { signup, login, forgotPassword, resetPassword, updatePassword };
+  const getLikes = tryCatch(async (req, res, next) => {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          'User not found'
+        )
+      );
+    }
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        likes: user.userFavouritesMinUsers,
+      },
+    });
+  });
+
+  const setLikes = tryCatch(async (req, res, next) => {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { userFavouritesMinUsers: req.body.likes },
+      { new: true }
+    );
+    // console.log(user);
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          'User not found'
+        )
+      );
+    }
+
+    req.user = user;
+
+    return res.status(HTTP_STATUS_CODES.OK_POST).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        likes: user.userFavouritesMinUsers,
+      },
+    });
+  });
+
+  return {
+    signup,
+    login,
+    forgotPassword,
+    resetPassword,
+    updatePassword,
+    getLikes,
+    setLikes,
+  };
 })();
 
 module.exports = UserController;

@@ -46,4 +46,9 @@ userRouter
     AuthorizationMiddleware.authorize,
     UserProductsController.addFavouriteUserProducts
   );
+
+userRouter
+  .route('/likes')
+  .get(AuthorizationMiddleware.authorize, UserController.getLikes)
+  .post(AuthorizationMiddleware.authorize, UserController.setLikes);
 module.exports = userRouter;

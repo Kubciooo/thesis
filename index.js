@@ -16,7 +16,7 @@ mongoose
   })
   .then(() => {
     // updateAllProductsFromDB();
-    setInterval(updateAllProductsFromDB, milisecondsFromHours(1));
+    setInterval(updateAllProductsFromDB, milisecondsFromHours(2));
   });
 
 const port = process.env.PORT || 8080;

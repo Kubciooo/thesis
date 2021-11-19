@@ -235,7 +235,6 @@ const ProductController = (() => {
   });
 
   const followProductById = tryCatch(async (req, res, next) => {
-    const { user } = req;
     const productId = req.params.id;
 
     const product = await Product.findById(productId);
@@ -248,10 +247,28 @@ const ProductController = (() => {
         )
       );
     }
-    if (!user.products.includes(product._id)) {
-      user.products.push(product._id);
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
     }
-    await user.save();
+    if (!user.products.includes(productId)) {
+      await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $push: { products: product._id },
+        },
+        {
+          new: true,
+        }
+      );
+    }
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_MESSAGES.OK,
@@ -284,6 +301,16 @@ const ProductController = (() => {
         new: true,
       }
     );
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
 
     req.user = user;
     res.status(HTTP_STATUS_CODES.OK).json({

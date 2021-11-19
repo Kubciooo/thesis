@@ -9,7 +9,10 @@ const { checkProductCoupon } = require('../services/scrapper.service');
 
 const ProductPromotionController = (() => {
   const getAllProductPromotions = tryCatch(async (req, res, next) => {
-    const productPromotions = await ProductPromotion.find(req.query)
+    const productPromotions = await ProductPromotion.find({
+      ...req.query,
+      rating: { $gte: req.user.userFavouritesMinUsers },
+    })
       .sort('-expiresAt')
       .populate('product');
 
@@ -36,8 +39,18 @@ const ProductPromotionController = (() => {
       );
     }
     if (!user.productPromotions.includes(promotion._id)) {
-      await promotion.update({ rating: promotion.rating + 1 });
-      user.productPromotions.push(promotion._id);
+      await ProductPromotion.findByIdAndUpdate(promotionId, {
+        rating: promotion.rating + 1,
+      });
+      req.user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $push: { productPromotions: promotionId },
+        },
+        {
+          new: true,
+        }
+      );
     } else {
       return next(
         new AppError(
@@ -47,12 +60,11 @@ const ProductPromotionController = (() => {
         )
       );
     }
-    await user.save();
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
-        user,
+        user: req.user,
       },
     });
   });
