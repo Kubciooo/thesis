@@ -167,7 +167,7 @@ const ProductController = (() => {
     let products = Product.find().populate('shop');
 
     const queryObj = { ...req.query };
-    const excludedFields = ['page', 'limit', 'name'];
+    const excludedFields = ['name'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
     let queryStr = JSON.stringify(queryObj);
@@ -175,11 +175,7 @@ const ProductController = (() => {
 
     products = products.find(JSON.parse(queryStr));
 
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 500;
-    const skip = (page - 1) * limit;
-
-    products = products.skip(skip).limit(limit);
+    // products = products.skip(skip).limit(limit);
 
     let productsData = await products;
 
@@ -193,6 +189,7 @@ const ProductController = (() => {
         return isProductSlugIncluded(searchSlug, productSlug, separator);
       });
     }
+    console.log('products', productsData);
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: 'Success',

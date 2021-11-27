@@ -22,14 +22,6 @@ const Scrapper = (() => {
     await page.waitForTimeout(Math.floor(Math.random() * timeTo) + timeFrom);
   };
 
-  const sleep = async (time) => {
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, time);
-    });
-  };
-
   const stripWhitespaces = (text) => {
     let replaced = text.replace(/(\r\n|\n|\r|\t)/gm, '');
     replaced = replaced.replace('[  \t]+', '');
@@ -391,14 +383,12 @@ const Scrapper = (() => {
 
     for (const product of products) {
       console.log(`Scrapping product ${product.url} ...`);
-      await sleep(5000);
       let newProductSnapshot;
       const workingCoupons = [];
       let minPrice = 999999999;
 
       if (product.coupons.length > 0) {
         for (const coupon of product.coupons) {
-          await sleep(5000);
           try {
             const [priceBefore, priceAfter] = await checkProductCoupon(
               {

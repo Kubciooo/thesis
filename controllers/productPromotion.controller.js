@@ -133,6 +133,7 @@ const ProductPromotionController = (() => {
 
   const createProductPromotion = tryCatch(async (req, res, next) => {
     const productPromotion = new ProductPromotion(req.body);
+    console.log(req.body.userValidation);
     const product = await Product.findById(req.body.product).populate('shop');
 
     if (!product) {

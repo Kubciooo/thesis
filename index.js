@@ -15,8 +15,8 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    // updateAllProductsFromDB();
-    setInterval(updateAllProductsFromDB, milisecondsFromHours(2));
+    updateAllProductsFromDB();
+    setInterval(updateAllProductsFromDB, milisecondsFromHours(3));
   });
 
 const port = process.env.PORT || 8080;
