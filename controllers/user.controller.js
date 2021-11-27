@@ -253,6 +253,70 @@ const UserController = (() => {
     });
   });
 
+  const getBlockedShops = tryCatch(async (req, res, next) => {
+    const user = await User.findById(req.user._id).populate('blockedShops');
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          'User not found'
+        )
+      );
+    }
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        blockedShops: user.blockedShops,
+      },
+    });
+  });
+
+  const setBlockedShops = tryCatch(async (req, res, next) => {
+    let user;
+    if (req.body.blocked) {
+      user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $addToSet: {
+            blockedShops: req.body.shopId,
+          },
+        },
+        { new: true }
+      );
+    } else {
+      user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $pull: {
+            blockedShops: req.body.shopId,
+          },
+        },
+        { new: true }
+      );
+    }
+
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          'User not found'
+        )
+      );
+    }
+
+    req.user = user;
+
+    return res.status(HTTP_STATUS_CODES.OK_POST).json({
+      message: HTTP_STATUS_MESSAGES.OK,
+      data: {
+        blockedShops: user.blockedShops,
+      },
+    });
+  });
+
   return {
     signup,
     login,
@@ -261,6 +325,8 @@ const UserController = (() => {
     updatePassword,
     getLikes,
     setLikes,
+    getBlockedShops,
+    setBlockedShops,
   };
 })();
 

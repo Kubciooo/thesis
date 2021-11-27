@@ -51,4 +51,9 @@ userRouter
   .route('/likes')
   .get(AuthorizationMiddleware.authorize, UserController.getLikes)
   .post(AuthorizationMiddleware.authorize, UserController.setLikes);
+
+userRouter
+  .route('/blockedShops')
+  .get(AuthorizationMiddleware.authorize, UserController.getBlockedShops)
+  .post(AuthorizationMiddleware.authorize, UserController.setBlockedShops);
 module.exports = userRouter;

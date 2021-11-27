@@ -9,13 +9,19 @@ const { checkProductCoupon } = require('../services/scrapper.service');
 
 const ProductPromotionController = (() => {
   const getAllProductPromotions = tryCatch(async (req, res, next) => {
-    const productPromotions = await ProductPromotion.find({
+    let productPromotions = await ProductPromotion.find({
       ...req.query,
       rating: { $gte: req.user.userFavouritesMinUsers },
     })
       .sort('-expiresAt')
       .populate('product');
 
+    for (let i = 0; i < req.user.blockedShops.length; i += 1) {
+      const shop = req.user.blockedShops[i];
+      productPromotions = productPromotions.filter(
+        (promotion) => promotion.product.shop.toString() !== shop.toString()
+      );
+    }
     res.status(HTTP_STATUS_CODES.OK).json({
       status: 'Success',
       data: {
@@ -112,6 +118,15 @@ const ProductPromotionController = (() => {
         model: 'Product',
       },
     });
+
+    let { productPromotions } = user;
+
+    for (let i = 0; i < req.user.blockedShops.length; i += 1) {
+      const shop = req.user.blockedShops[i];
+      productPromotions = productPromotions.filter(
+        (promotion) => promotion.product.shop.toString() !== shop.toString()
+      );
+    }
 
     if (!user) {
       return next(

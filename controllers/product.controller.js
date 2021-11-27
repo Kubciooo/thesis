@@ -188,6 +188,12 @@ const ProductController = (() => {
       });
     }
 
+    for (const shop of req.user.blockedShops) {
+      productsData = productsData.filter(
+        (product) => product.shop._id.toString() !== shop.toString()
+      );
+    }
+
     const currentUser = await User.findById(req.user._id).populate(
       'productPromotions'
     );
