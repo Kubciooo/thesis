@@ -10,7 +10,6 @@ const Emails = require('../utils/emails.util');
 
 const UserController = (() => {
   const signup = tryCatch(async (req, res, next) => {
-    console.log(req.body);
     if (req.body.password !== req.body.retypePassword) {
       return next(
         new AppError(

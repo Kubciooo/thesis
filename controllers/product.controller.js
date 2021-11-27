@@ -175,8 +175,6 @@ const ProductController = (() => {
 
     products = products.find(JSON.parse(queryStr));
 
-    // products = products.skip(skip).limit(limit);
-
     let productsData = await products;
 
     if (req.query.name) {
@@ -189,7 +187,26 @@ const ProductController = (() => {
         return isProductSlugIncluded(searchSlug, productSlug, separator);
       });
     }
-    console.log('products', productsData);
+
+    const currentUser = await User.findById(req.user._id).populate(
+      'productPromotions'
+    );
+
+    for (const product of productsData) {
+      for (const promotion of currentUser.productPromotions) {
+        if (product._id.equals(promotion.product)) {
+          if (promotion.type === 'COUPON') {
+            product.coupons.push(promotion.coupon);
+            if (promotion.discountType === 'PERCENTAGE') {
+              product.price =
+                (promotion.startingPrice * promotion.percentage) / 100;
+            } else {
+              product.price = promotion.startingPrice - promotion.amount;
+            }
+          }
+        }
+      }
+    }
 
     res.status(HTTP_STATUS_CODES.OK).json({
       status: 'Success',

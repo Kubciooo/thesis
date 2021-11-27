@@ -380,9 +380,12 @@ const Scrapper = (() => {
     console.log('Starting DB update...');
     const products = await Product.find({}).populate('shop');
     console.log(`Found products: ${products.length}`);
-
+    let i = 0;
     for (const product of products) {
-      console.log(`Scrapping product ${product.url} ...`);
+      i += 1;
+      console.log(
+        `Scrapping product ${i}/${products.length}: ${product.url} ...`
+      );
       let newProductSnapshot;
       const workingCoupons = [];
       let minPrice = 999999999;
