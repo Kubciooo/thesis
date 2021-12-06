@@ -3,7 +3,7 @@ const ProductPromotionController = require('../controllers/productPromotion.cont
 const ProductController = require('../controllers/product.controller');
 const UserController = require('../controllers/user.controller');
 const AuthorizationMiddleware = require('../middlewares/authorization.middleware');
-const UserProductsController = require('../controllers/userProducts.controller');
+const FoldersController = require('../controllers/folders.controller');
 
 const userRouter = express.Router();
 
@@ -38,13 +38,10 @@ userRouter
 
 userRouter
   .route('/favourites/folder')
-  .get(
-    AuthorizationMiddleware.authorize,
-    UserProductsController.getFavouriteUserProducts
-  )
+  .get(AuthorizationMiddleware.authorize, FoldersController.getFavouriteFolder)
   .post(
     AuthorizationMiddleware.authorize,
-    UserProductsController.addFavouriteUserProducts
+    FoldersController.setFavouriteFolder
   );
 
 userRouter

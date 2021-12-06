@@ -30,6 +30,7 @@ const ProductController = (() => {
 
     const user = await User.findById(userId);
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -42,7 +43,7 @@ const ProductController = (() => {
     user.favouriteProduct = product._id;
 
     await user.save();
-    return res.status(HTTP_STATUS_CODES.OK_POST).json({
+    return res.status(HTTP_STATUS_CODES.OK).json({
       message: HTTP_STATUS_MESSAGES.OK,
       data: {
         favouriteProduct: product,
@@ -62,6 +63,7 @@ const ProductController = (() => {
       },
     });
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -79,11 +81,8 @@ const ProductController = (() => {
       },
     });
   });
-
+  /* istanbul ignore next */
   const addProductsFromScrapper = tryCatch(async (req, res, next) => {
-    /**
-     * @todo use https://express-validator.github.io/docs/index.html
-     */
     if (
       !(
         req.body.minPrice &&
@@ -115,7 +114,7 @@ const ProductController = (() => {
 
     const category = await Category.findById(categoryId);
 
-    if (!categoryId) {
+    if (!category) {
       return next(
         new AppError(
           'NotFoundError',
@@ -205,9 +204,10 @@ const ProductController = (() => {
             product.coupons.push(promotion.coupon);
             if (promotion.discountType === 'PERCENTAGE') {
               product.price =
+                promotion.startingPrice -
                 (promotion.startingPrice * promotion.percentage) / 100;
             } else {
-              product.price = promotion.startingPrice - promotion.amount;
+              product.price = promotion.startingPrice - promotion.cash;
             }
           }
         }
@@ -268,6 +268,7 @@ const ProductController = (() => {
       );
     }
     const user = await User.findById(req.user._id);
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -322,6 +323,7 @@ const ProductController = (() => {
       }
     );
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -351,6 +353,7 @@ const ProductController = (() => {
       },
     });
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(

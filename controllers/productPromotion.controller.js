@@ -127,7 +127,7 @@ const ProductPromotionController = (() => {
         (promotion) => promotion.product.shop.toString() !== shop.toString()
       );
     }
-
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -148,7 +148,6 @@ const ProductPromotionController = (() => {
 
   const createProductPromotion = tryCatch(async (req, res, next) => {
     const productPromotion = new ProductPromotion(req.body);
-    console.log(req.body.userValidation);
     const product = await Product.findById(req.body.product).populate('shop');
 
     if (!product) {
@@ -169,6 +168,7 @@ const ProductPromotionController = (() => {
         },
         productPromotion.coupon
       );
+      /* istanbul ignore if */
       if (productPriceBefore !== productPriceAfter) {
         const newSnapshot = {
           coupons: product.coupons.concat([productPromotion.coupon]),
@@ -233,6 +233,7 @@ const ProductPromotionController = (() => {
     });
   });
 
+  /* istanbul ignore next */
   const getProductPromotionsByProductUrl = tryCatch(async (req, res, next) => {
     const product = await Product.findOne({ url: req.params.url });
     const productPromotions = await ProductPromotion.find({

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const userProductSchema = mongoose.Schema({
+const folderSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -14,6 +14,6 @@ const userProductSchema = mongoose.Schema({
   ],
 });
 
-const Product = mongoose.model('UserProduct', userProductSchema);
+const Folder = mongoose.model('Folder', folderSchema);
 
-module.exports = Product;
+module.exports = Folder;

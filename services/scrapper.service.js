@@ -15,19 +15,38 @@ const Product = require('../models/product.model');
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
+/**
+ * Scrapper Service
+ */
 const Scrapper = (() => {
+  /**
+   * Funkcja, która zatrzymuje wykonywanie skryptów przez Puppeteer na określony czas
+   * @param {Page} page - Obiekt Page zawierający stronę, na której ma zostać wykonany skrypt
+   * @param {Double} time - czas w milisekundach
+   */
   const waitRandomTime = async (page, time) => {
     const timeFrom = time;
     const timeTo = time * 1.5;
     await page.waitForTimeout(Math.floor(Math.random() * timeTo) + timeFrom);
   };
 
+  /**
+   * Funkcja usuwająca spacje z początku i końca stringa
+   * @param {String} text - string, z którego mają zostać usunięte spacje
+   * @returns text - string bez spacji na początku i końcu
+   */
   const stripWhitespaces = (text) => {
     let replaced = text.replace(/(\r\n|\n|\r|\t)/gm, '');
     replaced = replaced.replace('[  \t]+', '');
     return replaced;
   };
 
+  /**
+   * Funkcja podmieniające wszystkie tagi w teksćie na podane w argumencie
+   * @param {*} unformatted - tekst do zmiany
+   * @param {*} tagFormatter - tag do podmiany
+   * @returns formatted - tekst z podmienionym tagiem
+   */
   const formatString = (unformatted, tagFormatter) => {
     let formatted = unformatted;
     for (const [key, value] of Object.entries(tagFormatter)) {
@@ -36,6 +55,15 @@ const Scrapper = (() => {
 
     return formatted;
   };
+
+  /**
+   * Funkcja zwracająca listę promocji dla danego produktu
+   * @param {Page} page - instancja Page zawierająca stronę do przeglądania
+   * @param {HTMLElement} item - element HTML zawierający informacje o produkcie
+   * @param {String} promotionListSelector - selektor listy promocji
+   * @param {String} promotionSelector - selektor elementu promocji
+   * @returns {Array} - lista promocji
+   */
   const getPromotionsListForSingleItem = async (
     page,
     item,
@@ -69,9 +97,14 @@ const Scrapper = (() => {
     return promotionsList;
   };
 
+  /**
+   * Funkcja sprawdzająca i zwracająca cenę produktu
+   * @param {Product} product - produkt, którego cena ma zostać zwrócona
+   * @returns {Number} - cena produktu
+   */
   const checkProductPrice = async (product) => {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: process.env.NODE_ENV !== 'testing',
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
@@ -123,18 +156,19 @@ const Scrapper = (() => {
   };
 
   /**
-   * @param {Object} product - product object with shop, url and coupon properties
-   * @returns [priceBefore, priceAfter] - price before adding the coupon and after adding the coupon
+   * Funkcja sprawdzająca czy kupon jest prawidłowy
+   * @param {Object} product - obiekt produktu zawierający informacje o produkcie
+   * @returns [priceBefore, priceAfter] - ceny przed i po zastosowaniu kuponu
    */
   const checkProductCoupon = async (product, coupon) => {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: process.env.NODE_ENV !== 'testing',
       ignoreHTTPSErrors: true,
       slowMo: 0,
       args: [
         '--window-size=1400,900',
         '--remote-debugging-port=9222',
-        '--remote-debugging-address=0.0.0.0', // You know what your doing?
+        '--remote-debugging-address=0.0.0.0',
         '--disable-gpu',
         '--disable-features=IsolateOrigins,site-per-process',
         '--blink-settings=imagesEnabled=true',
@@ -226,10 +260,19 @@ const Scrapper = (() => {
     } catch (err) {
       console.log(err);
       await browser.close();
+      // zwróć ceny 0,0 jeśli wystąpił błąd
       return [0, 0];
     }
   };
 
+  /**
+   * Funkcja wyciągająca ze stron sklepów informacje o produktach
+   * @param {*} shops - lista sklepów
+   * @param {*} priceMin - minimalna cena produktu
+   * @param {*} priceMax - maksymalna cena produktu
+   * @param {*} productName - nazwa produktu
+   * @returns {Array} - array of products - lista produktów
+   */
   const scrapPages = async (shops, priceMin, priceMax, productName) => {
     const browser = await puppeteer.launch({
       headless: false,
@@ -238,13 +281,21 @@ const Scrapper = (() => {
       args: [
         '--window-size=1400,900',
         '--remote-debugging-port=9222',
-        '--remote-debugging-address=0.0.0.0', // You know what your doing?
+        '--remote-debugging-address=0.0.0.0',
         '--disable-gpu',
         '--disable-features=IsolateOrigins,site-per-process',
         '--blink-settings=imagesEnabled=true',
       ],
     });
 
+    /**
+     * Funkcja wyciągająca informacje o produktach z podanej strony
+     * @param {Browser} bw - instancja przeglądarki
+     * @param {*} shopName - nazwa sklepu
+     * @param {*} shopId - id sklepu
+     * @param {*} shopCategory - kategoria sklepu
+     * @returns
+     */
     const scrapSinglePage = async (bw, shopName, shopId, shopCategory) => {
       const candidateProducts = [];
       const page = await bw.newPage();
@@ -259,8 +310,9 @@ const Scrapper = (() => {
       const { separator } = SITES_CONFIG[shopName];
       const { priceTagFormatter } = SITES_CONFIG[shopName];
       const productSlug = getSlug(productName, separator);
-      let { itemNameSelector } = shopOptions; // some webpages redirect to the item page if no other items exist
-      let { itemPriceSelector } = shopOptions; // some webpages redirect to the item page if no other items exist
+      // niektóre sklepy wymagają dodatkowego kliknięcia na różne elementy
+      let { itemNameSelector } = shopOptions;
+      let { itemPriceSelector } = shopOptions;
       let isSinglePage = false;
       const pageURL = shopOptions.pageUrl(productSlug, priceMin, priceMax);
 
@@ -369,13 +421,15 @@ const Scrapper = (() => {
     const sortedProducts = concatenatedProductsArray.sort(
       (a, b) => a.price - b.price
     );
-
-    // console.dir(sortedProducts, { depth: null });
     await browser.close();
 
     return sortedProducts;
   };
 
+  /**
+   * Funkcja, która wyciąga informacje o produktach z podanych sklepów
+   * i aktualizuje bazę danych z utworzonymi snapshotami produktów
+   */
   const updateAllProductsFromDB = async () => {
     console.log('Starting DB update...');
     const products = await Product.find({}).populate('shop');

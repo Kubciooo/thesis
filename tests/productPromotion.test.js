@@ -8,7 +8,7 @@ const app = require('../app');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 
 describe('/promotions/product route', () => {
-  jest.setTimeout(20000);
+  jest.setTimeout(70000);
 
   let userToken;
   let categoryId;
@@ -36,9 +36,26 @@ describe('/promotions/product route', () => {
       .post('/api/shops')
       .set('Authorization', `Bearer ${user.body.data.token}`)
       .send({
-        name: 'new shop',
+        name: 'xkom',
         mainUrl: 'https://www.x-kom.pl/',
       });
+
+    const blockedShopRes = await request(app)
+      .post('/api/shops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        name: 'mediamarkt',
+        mainUrl: 'https://www.mediamarkt.pl/',
+      });
+
+    const blockedShopsResponse = await request(app)
+      .post('/api/users/blockedShops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        shopId: blockedShopRes.body.data.shop._id,
+        blocked: true,
+      });
+    user.blockedShops = blockedShopsResponse.body.data.blockedShops;
 
     shop = shopResponse.body.data.shop;
 
@@ -48,6 +65,9 @@ describe('/promotions/product route', () => {
       .send({
         name: 'new product',
         category: categoryId,
+        shop: shop._id,
+        price: 100,
+        url: 'https://www.x-kom.pl/',
       });
 
     product = productResponse.body.data.product;
@@ -80,15 +100,55 @@ describe('/promotions/product route', () => {
         name: 'new product promotion',
         shop: shop._id,
         product: product._id,
+        userValidation: true,
         type: 'COUPON',
         coupon: 'testing coupon',
         startingPrice: 1500,
-        discountType: 'percentage',
-        expiresAt: Date.now() + 10,
+        discountType: 'PERCENTAGE',
+        expiresAt: Date.now() + 1000,
         percentage: 99,
       });
     expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
     expect(res.body).toHaveProperty('data');
+  });
+
+  it('Should try to add new product promotion', async () => {
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: product._id,
+        userValidation: false,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'PERCENTAGE',
+        expiresAt: Date.now() + 1000,
+        percentage: 99,
+      });
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
+  });
+
+  it('Should throw notFoundError on add new product promotion', async () => {
+    const randomKey = mongoose.Types.ObjectId();
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: randomKey,
+        userValidation: true,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'PERCENTAGE',
+        expiresAt: Date.now() + 1000,
+        percentage: 99,
+      });
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
   });
 
   it('Should find 5 product promotions by product id', async () => {
@@ -100,11 +160,12 @@ describe('/promotions/product route', () => {
           name: 'new product promotion',
           shop: shop._id,
           product: product._id,
+          userValidation: true,
           type: 'COUPON',
           coupon: 'testing coupon',
           startingPrice: 1500,
           discountType: 'percentage',
-          expiresAt: Date.now() + 10,
+          expiresAt: Date.now() + 10000,
           percentage: 99,
         });
     }
@@ -157,11 +218,12 @@ describe('/promotions/product route', () => {
         name: 'new product promotion',
         shop: shop._id,
         product: product._id,
+        userValidation: true,
         type: 'COUPON',
         coupon: 'testing coupon',
         startingPrice: 1500,
         discountType: 'other promotion',
-        expiresAt: Date.now() + 10,
+        expiresAt: Date.now() + 10000,
         percentage: 99,
       });
 
@@ -183,6 +245,7 @@ describe('/promotions/product route', () => {
         name: 'new product promotion',
         shop: shop._id,
         product: product._id,
+        userValidation: true,
         type: 'COUPON',
         coupon: 'testing coupon',
         startingPrice: 1500,
@@ -210,10 +273,11 @@ describe('/promotions/product route', () => {
         shop: shop._id,
         product: product._id,
         type: 'COUPON',
+        userValidation: true,
         coupon: 'testing coupon',
         startingPrice: 1500,
         discountType: 'percentage',
-        expiresAt: Date.now() + 10,
+        expiresAt: Date.now() + 10000,
       });
 
     expect(res.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
@@ -225,6 +289,7 @@ describe('/promotions/product route', () => {
       'Invalid input data. Path `percentage` is required'
     );
   });
+
   it('Should find 2 product promotions', async () => {
     await request(app)
       .post('/api/promotions/products')
@@ -232,12 +297,13 @@ describe('/promotions/product route', () => {
       .send({
         name: 'new product promotion',
         shop: shop._id,
+        userValidation: true,
         product: product._id,
         type: 'COUPON',
         coupon: 'testing coupon',
         startingPrice: 1500,
         discountType: 'percentage',
-        expiresAt: Date.now() + 10,
+        expiresAt: Date.now() + 10000,
         percentage: 99,
       });
 
@@ -248,11 +314,12 @@ describe('/promotions/product route', () => {
         name: 'new product promotion',
         shop: shop._id,
         product: product._id,
+        userValidation: true,
         type: 'COUPON',
         coupon: 'testing coupon',
         startingPrice: 1500,
         discountType: 'percentage',
-        expiresAt: Date.now() + 10,
+        expiresAt: Date.now() + 10000,
         percentage: 99,
       });
 
@@ -263,5 +330,217 @@ describe('/promotions/product route', () => {
 
     expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK);
     expect(res.body).toHaveProperty('data');
+  });
+
+  it('Should follow percentage product promotion', async () => {
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: product._id,
+        userValidation: true,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'percentage',
+        expiresAt: Date.now() + 10000,
+        percentage: 99,
+      });
+
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('productPromotion');
+    expect(res.body.data.productPromotion).toHaveProperty('_id');
+
+    const res2 = await request(app)
+      .patch(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const allProductsResponse = await request(app)
+      .get('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(allProductsResponse.body.data.products[0]).toHaveProperty('price');
+    expect(allProductsResponse.body.data.products[0].price).toEqual(15);
+  });
+
+  it('Should follow cash product promotion', async () => {
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: product._id,
+        userValidation: true,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'cash',
+        expiresAt: Date.now() + 10000,
+        cash: 100,
+      });
+
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('productPromotion');
+    expect(res.body.data.productPromotion).toHaveProperty('_id');
+
+    const res2 = await request(app)
+      .patch(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const allProductsResponse = await request(app)
+      .get('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(allProductsResponse.body.data.products[0]).toHaveProperty('price');
+    expect(allProductsResponse.body.data.products[0].price).toEqual(1400);
+  });
+
+  it('Should throw BadRequestError on follow product promotion', async () => {
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: product._id,
+        userValidation: true,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'percentage',
+        expiresAt: Date.now() + 10000,
+        percentage: 99,
+      });
+
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('productPromotion');
+    expect(res.body.data.productPromotion).toHaveProperty('_id');
+
+    const res2 = await request(app)
+      .patch(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const res3 = await request(app)
+      .patch(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res3.statusCode).toEqual(HTTP_STATUS_CODES.BAD_REQUEST);
+  });
+
+  it('Should return NotFoundError on follow productPromotion', async () => {
+    const randomToken = mongoose.Types.ObjectId();
+
+    const res2 = await request(app)
+      .patch(`/api/promotions/products/${randomToken}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+
+  it('Should unfollow product promotion', async () => {
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: product._id,
+        userValidation: true,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'percentage',
+        expiresAt: Date.now() + 10000,
+        percentage: 99,
+      });
+
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('productPromotion');
+    expect(res.body.data.productPromotion).toHaveProperty('_id');
+
+    const res2 = await request(app)
+      .patch(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const res3 = await request(app)
+      .delete(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res3.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+  });
+
+  it('Should return NotFoundError on unfollow productPromotion', async () => {
+    const randomToken = mongoose.Types.ObjectId();
+
+    const res2 = await request(app)
+      .delete(`/api/promotions/products/${randomToken}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+
+  it('Should get one promotion followed by user', async () => {
+    const res = await request(app)
+      .post('/api/promotions/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        name: 'new product promotion',
+        shop: shop._id,
+        product: product._id,
+        userValidation: true,
+        type: 'COUPON',
+        coupon: 'testing coupon',
+        startingPrice: 1500,
+        discountType: 'percentage',
+        expiresAt: Date.now() + 10000,
+        percentage: 99,
+      });
+
+    expect(res.statusCode).toEqual(HTTP_STATUS_CODES.OK_POST);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveProperty('productPromotion');
+    expect(res.body.data.productPromotion).toHaveProperty('_id');
+
+    const res2 = await request(app)
+      .patch(`/api/promotions/products/${res.body.data.productPromotion._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const res3 = await request(app)
+      .get(`/api/users/productPromotions`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res3.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+    expect(res3.body).toHaveProperty('data');
+    expect(res3.body.data).toHaveProperty('productPromotions');
+    expect(res3.body.data.productPromotions).toHaveLength(1);
   });
 });

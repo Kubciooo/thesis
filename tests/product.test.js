@@ -77,6 +77,15 @@ describe('/product route', () => {
         mainUrl: 'https://morele.net/',
       });
     shops.push(shopResponse5.body.data.shop._id);
+
+    const blockedShopsResponse = await request(app)
+      .post('/api/users/blockedShops')
+      .set('Authorization', `Bearer ${user.body.data.token}`)
+      .send({
+        shopId: shopResponse5.body.data.shop._id,
+        blocked: true,
+      });
+    user.blockedShops = blockedShopsResponse.body.data.blockedShops;
   });
 
   beforeEach(async () => {
@@ -269,27 +278,63 @@ describe('/product route', () => {
     ).toBe('Pół roku nie płacisz! Pierwsza rata w maju 2022');
   });
 
-  it('Should run scrapper for all shops', async () => {
+  it('should create 2 products and find 1', async () => {
     const response = await request(app)
-      .get('/api/products/scrapper')
+      .post('/api/products')
       .set('Authorization', `Bearer ${userToken}`)
-      .send({
-        minPrice: 3000,
-        maxPrice: 6000,
-        productName: 'iphone 12 pro',
-        categoryId,
-        shops,
-      });
+      .send([
+        {
+          url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+          name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+          price: 429,
+          categories: [categoryId],
+          shop: shopId,
+          coupons: ['testing-coupon'],
+          otherPromotions: [
+            {
+              name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+            },
+            {
+              url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+            },
+          ],
+        },
+        {
+          url: 'https://www.mediaexpert.pl/komputery-i-tablety/laptopy-i-ultrabooki/laptopy/notebook-asus-zbook-13-ux325ja-kg249t-i5-1035g4-16gb-512ssd-irisxe-13-3-w10-pink',
+          name: 'Laptop ASUS ZenBook 13.3" OLED i5-1035G4 16GB SSD 512GB Windows 10 Home',
+          price: 4499,
+          categories: [categoryId],
+          shop: shopId,
+          coupons: ['MLO-061121'],
+          otherPromotions: [
+            {
+              name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+            },
+            {
+              url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+            },
+            {
+              name: 'Pół roku nie płacisz! Pierwsza rata w maju 2022              ',
+            },
+          ],
+        },
+      ]);
 
-    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
-    expect(response.body).toHaveProperty('data');
-    expect(response.body.data).toHaveProperty('products');
-    expect(response.body.data.products).not.toHaveLength(0);
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+
+    const allProductsResponse = await request(app)
+      .get('/api/products?name=laptop')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(allProductsResponse.body).toHaveProperty('data');
+    expect(allProductsResponse.body.data).toHaveProperty('products');
+    expect(allProductsResponse.body.data.products).toHaveLength(1);
   });
 
   it('Should run scrapper for all shops', async () => {
     const response = await request(app)
-      .get('/api/products/scrapper')
+      .post('/api/products/scrapper')
       .set('Authorization', `Bearer ${userToken}`)
       .send({
         minPrice: 3000,
@@ -305,7 +350,7 @@ describe('/product route', () => {
     expect(response.body.data.products).not.toHaveLength(0);
 
     const res = await request(app)
-      .get('/api/products?page=1&limit=10&price[gte]=3000&price[lte]=6000')
+      .get('/api/products?price[gte]=3000&price[lte]=6000')
       .set('Authorization', `Bearer ${userToken}`)
       .send({
         name: 'iphone 12 pro',
@@ -314,7 +359,7 @@ describe('/product route', () => {
     expect(res.status).toBe(HTTP_STATUS_CODES.OK);
     expect(res.body).toHaveProperty('data');
     expect(res.body.data).toHaveProperty('products');
-    expect(res.body.data.products).toHaveLength(10);
+    expect(res.body.data.products).not.toHaveLength(0);
   });
 
   it('Should throw ValidationError', async () => {
@@ -367,7 +412,7 @@ describe('/product route', () => {
 
   it('Should throw HTTPValidationError', async () => {
     const response = await request(app)
-      .get('/api/products/scrapper')
+      .post('/api/products/scrapper')
       .set('Authorization', `Bearer ${userToken}`)
       .send({
         productName: 'iphone 12 pro',
@@ -384,5 +429,275 @@ describe('/product route', () => {
     expect(response.body.message).toBe(
       '{minPrice, maxPrice} fields are required.'
     );
+  });
+
+  it('Should throw NotFoundError', async () => {
+    const response = await request(app)
+      .post('/api/products/scrapper')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        productName: 'iphone 12 pro',
+        minPrice: 3000,
+        maxPrice: 6000,
+        categoryId: mongoose.Types.ObjectId(),
+        shops,
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+
+  it('should follow a new product item', async () => {
+    const response = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+    expect(response.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(response.body.data.product.price).toBe(429);
+    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
+    expect(response.body.data.product.otherPromotions).toHaveLength(2);
+    expect(response.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+    const product = await Product.findById(response.body.data.product._id);
+
+    expect(product.name).toBe('Kuchenka mikrofalowa SAMSUNG GE83X');
+    expect(product.price).toBe(429);
+    expect(product.coupons).toEqual(['testing-coupon']);
+    expect(product.otherPromotions).toHaveLength(2);
+    expect(product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+
+    const res2 = await request(app)
+      .patch(`/api/products/${product._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+  });
+
+  it('should set a product as favourite and get it', async () => {
+    const response = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+    expect(response.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(response.body.data.product.price).toBe(429);
+    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
+    expect(response.body.data.product.otherPromotions).toHaveLength(2);
+    expect(response.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+    const product = await Product.findById(response.body.data.product._id);
+
+    expect(product.name).toBe('Kuchenka mikrofalowa SAMSUNG GE83X');
+    expect(product.price).toBe(429);
+    expect(product.coupons).toEqual(['testing-coupon']);
+    expect(product.otherPromotions).toHaveLength(2);
+    expect(product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+
+    const res2 = await request(app)
+      .post(`/api/users/favourites/product`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        productId: product._id,
+      });
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const res3 = await request(app)
+      .get(`/api/users/favourites/product`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res3.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+  });
+
+  it('Should return NotFoundError on follow product', async () => {
+    const randomToken = mongoose.Types.ObjectId();
+
+    const res2 = await request(app)
+      .patch(`/api/products/${randomToken}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+
+  it('Should return NotFoundError on set a product as favourite', async () => {
+    const randomToken = mongoose.Types.ObjectId();
+
+    const res2 = await request(app)
+      .post(`/api/users/favourites/product`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        productId: randomToken,
+      });
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+
+  it('should unfollow a product item', async () => {
+    const response = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+    expect(response.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(response.body.data.product.price).toBe(429);
+    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
+    expect(response.body.data.product.otherPromotions).toHaveLength(2);
+    expect(response.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+    const product = await Product.findById(response.body.data.product._id);
+
+    expect(product.name).toBe('Kuchenka mikrofalowa SAMSUNG GE83X');
+    expect(product.price).toBe(429);
+    expect(product.coupons).toEqual(['testing-coupon']);
+    expect(product.otherPromotions).toHaveLength(2);
+    expect(product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+
+    const res2 = await request(app)
+      .patch(`/api/products/${product._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const res3 = await request(app)
+      .delete(`/api/products/${product._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res3.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+  });
+
+  it('Should return NotFoundError on ufollow product', async () => {
+    const randomToken = mongoose.Types.ObjectId();
+
+    const res2 = await request(app)
+      .delete(`/api/products/${randomToken}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.NOT_FOUND);
+  });
+
+  it('Should get all followed products', async () => {
+    const response = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        url: 'https://www.mediaexpert.pl/agd-male/do-kuchni/kuchnie-mikrofalowe/kuchenka-mikrofalowa-samsung-ge83x',
+        name: 'Kuchenka mikrofalowa SAMSUNG GE83X',
+        price: 429,
+        categories: [categoryId],
+        shop: shopId,
+        coupons: ['testing-coupon'],
+        otherPromotions: [
+          {
+            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+          },
+          {
+            url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
+          },
+        ],
+      });
+
+    expect(response.status).toBe(HTTP_STATUS_CODES.OK_POST);
+    expect(response.body.data.product.name).toBe(
+      'Kuchenka mikrofalowa SAMSUNG GE83X'
+    );
+    expect(response.body.data.product.price).toBe(429);
+    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
+    expect(response.body.data.product.otherPromotions).toHaveLength(2);
+    expect(response.body.data.product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+    const product = await Product.findById(response.body.data.product._id);
+
+    expect(product.name).toBe('Kuchenka mikrofalowa SAMSUNG GE83X');
+    expect(product.price).toBe(429);
+    expect(product.coupons).toEqual(['testing-coupon']);
+    expect(product.otherPromotions).toHaveLength(2);
+    expect(product.otherPromotions[0].name).toBe(
+      'Multirabaty! Piąty wybrany produkt za 1 zł!'
+    );
+
+    const res2 = await request(app)
+      .patch(`/api/products/${product._id}`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res2.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+
+    const res3 = await request(app)
+      .get('/api/users/products')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send();
+
+    expect(res3.statusCode).toEqual(HTTP_STATUS_CODES.OK);
+    expect(res3.body.data.products).toHaveLength(1);
   });
 });

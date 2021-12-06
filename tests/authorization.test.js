@@ -32,13 +32,7 @@ describe('Should throw InvalidUser error for authorization', () => {
     await dbHandler.closeDatabase();
   });
 
-  const routes = [
-    'categories',
-    'shops',
-    'products',
-    'promotions/shops',
-    'promotions/products',
-  ];
+  const routes = ['categories'];
 
   for (const route of routes) {
     it(`Should throw InvalidUser error for /${route}`, async () => {

@@ -80,6 +80,7 @@ const UserController = (() => {
     });
   });
 
+  /* istanbul ignore next */
   const forgotPassword = tryCatch(async (req, res, next) => {
     const user = await User.findOne({ login: req.body.login });
     if (!user) {
@@ -112,6 +113,7 @@ const UserController = (() => {
     }
   });
 
+  /* istanbul ignore if */
   const updatePassword = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).select('+password');
     const isUserValidated = await user.validatePassword(
@@ -163,6 +165,7 @@ const UserController = (() => {
       passwordForgotTokenExpiration: { $gt: Date.now() },
     });
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -208,6 +211,7 @@ const UserController = (() => {
 
   const getLikes = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id);
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -232,7 +236,7 @@ const UserController = (() => {
       { userFavouritesMinUsers: req.body.likes },
       { new: true }
     );
-    // console.log(user);
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -255,6 +259,7 @@ const UserController = (() => {
 
   const getBlockedShops = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).populate('blockedShops');
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -297,6 +302,7 @@ const UserController = (() => {
       );
     }
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(

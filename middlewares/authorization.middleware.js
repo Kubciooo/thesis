@@ -29,6 +29,7 @@ const AuthorizationMiddleware = (() => {
     );
     const user = await User.findById(decoded.id);
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(

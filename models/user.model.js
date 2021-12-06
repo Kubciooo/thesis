@@ -81,16 +81,16 @@ const userSchema = mongoose.Schema({
   passwordForgotTokenExpiration: {
     type: Date,
   },
-  userProducts: [
+  folders: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'UserProduct',
+      ref: 'Folder',
       default: [],
     },
   ],
-  favouriteUserProducts: {
+  favouriteFolder: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'UserProduct',
+    ref: 'Folder',
     select: true,
   },
   userFavouritesMinUsers: {

@@ -9,7 +9,7 @@ const productRouter = require('./routes/product.route');
 const userRouter = require('./routes/user.route');
 const shopPromotionRouter = require('./routes/shopPromotion.route');
 const productPromotionRouter = require('./routes/productPromotion.route');
-const userProductsRouter = require('./routes/userProducts.route');
+const foldersRoute = require('./routes/folders.route');
 
 const app = express();
 
@@ -35,11 +35,7 @@ app.use(
 );
 app.use('/api/users', userRouter);
 
-app.use(
-  '/api/userProducts',
-  AuthorizationMiddleware.authorize,
-  userProductsRouter
-);
+app.use('/api/folders', AuthorizationMiddleware.authorize, foldersRoute);
 
 app.use(ErrorController.initialize);
 module.exports = app;

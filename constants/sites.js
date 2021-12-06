@@ -33,31 +33,111 @@ const SITES_CONFIG = {
   },
 
   xkom: {
+    /**
+     * @type {string}
+     * @description nazwa sklepu
+     */
     name: 'xkom',
+    /**
+     * @type {number}
+     * @description czas w milisekundach, po którym zostanie wykonana akcja
+     */
     actionsDelay: 2000,
+    /**
+     * @type {string}
+     * @description separator nazwy produktu
+     */
     separator: '%20',
+    /**
+     * @type {object}
+     * @description formatowanie ceny
+     */
     priceTagFormatter: {
       ' ': '',
       zł: '',
       ',': '.',
     },
+    /**
+     * @type {object}
+     * @description selektory sklepu
+     */
     shopSelectors: {
+      /**
+       * @type {string}
+       * @description selektor kontenerów z produktami
+       */
       itemBoxesSelector: '.sc-1yu46qn-4',
+      /**
+       * @type {string}
+       * @description selektor nazwy produktu
+       * @example
+       * <div class="irSQpN">
+       */
       itemNameSelector: '.irSQpN',
+      /**
+       * @type {string}
+       * @description selektor ceny produktu
+       * @example
+       * <div class="sc-6n68ef-3">
+       */
       itemPriceSelector: '.sc-6n68ef-3',
+      /**
+       * Funkcja do otwierania strony wyszukiwania produktów z podanymi parametrami
+       * @param {*} productSlug - slug produktu
+       * @param {*} priceMin - minimalna cena
+       * @param {*} priceMax - maksymalna cena
+       * @returns {string} - adres strony z produktami
+       * @example
+       * https://www.x-kom.pl/szukaj?q=%20komputer%20i%20tablety&price_min=0&price_max=0
+       */
       pageUrl: (productSlug, priceMin, priceMax) =>
         `https://www.x-kom.pl/szukaj?per_page=90&sort_by=price_asc&f%5Bprice%5D%5Bfrom%5D=${priceMin}&f%5Bprice%5D%5Bto%5D=${priceMax}&q=${productSlug}`,
     },
+    /**
+     * @type {object}
+     * @description selektory produktu
+     */
     productSelectors: {
+      /**
+       * @type {string}
+       * @description selektor startowej ceny produktu
+       */
       startingPriceSelector: '.n4n86h-4.edNVst',
+      /**
+       * @type {string}
+       * @description selektor do pobierania informacji o braku produktu
+       */
       productOutOfStockSelector: '.sc-12cu01r-5.cjNyNK',
+      /**
+       * @type {string}
+       * @description selektor do pobierania informacji o dodaniu produktu do koszyka
+       */
       addToBasketButtonSelector: 'button[title="Dodaj do koszyka"]',
+      /**
+       * @type {Array<string>}
+       * @description lista selektorów do pobierania dodatkowych przycisków
+       * dodania do koszyka
+       */
       additionalBasketSelectors: [
         'a.sc-1h16fat-0.sc-1v4lzt5-11.emnmDG.sc-153gokr-0.jRbixD',
         'button.sc-15ih3hi-0.h0yxm6-2.gamchB',
       ],
+      /**
+       * @type {string}
+       * @description selektor do pobierania pola wpisywania kodu kuponu
+       */
       couponInputSelector: 'input.sc-67avig-1',
+      /**
+       * @type {string}
+       * @description selektor do aktywacji kuponu
+       * @example
+       * <button class="sc-15ih3hi-0 sc-67avig-2 fdviAh" type="submit">
+       */
       couponActivateSelector: 'button.sc-15ih3hi-0.sc-67avig-2.fdviAh',
+      /**
+       * @type {string}
+       * @description selektor do pobierania ceny produktu
+       */
       priceTagSelector: '.pvj85d-3',
     },
   },

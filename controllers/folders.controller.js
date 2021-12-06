@@ -1,4 +1,4 @@
-const UserProducts = require('../models/userProducts.model');
+const Folders = require('../models/folders.model');
 const User = require('../models/user.model');
 const AppError = require('../services/error.service');
 const tryCatch = require('../utils/tryCatch.util');
@@ -6,11 +6,11 @@ const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const Product = require('../models/product.model');
 
-const UserProductsController = (() => {
-  const addFavouriteUserProducts = tryCatch(async (req, res, next) => {
+const FoldersController = (() => {
+  const setFavouriteFolder = tryCatch(async (req, res, next) => {
     const { folderId } = req.body;
     const userId = req.user._id;
-    const folder = await UserProducts.findById(folderId).populate({
+    const folder = await Folders.findById(folderId).populate({
       path: 'products',
       model: 'Product',
       populate: {
@@ -29,9 +29,10 @@ const UserProductsController = (() => {
       );
     }
     const user = await User.findByIdAndUpdate(userId, {
-      favouriteUserProducts: folder._id,
+      favouriteFolder: folder._id,
     });
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -46,17 +47,17 @@ const UserProductsController = (() => {
     return res.status(HTTP_STATUS_CODES.OK_POST).json({
       message: HTTP_STATUS_MESSAGES.OK,
       data: {
-        favouriteUserProducts: folder,
+        favouriteFolder: folder,
       },
     });
   });
 
-  const getFavouriteUserProducts = tryCatch(async (req, res, next) => {
+  const getFavouriteFolder = tryCatch(async (req, res, next) => {
     const userId = req.user._id;
 
     const user = await User.findById(userId).populate({
-      path: 'favouriteUserProducts',
-      model: 'UserProduct',
+      path: 'favouriteFolder',
+      model: 'Folder',
       populate: {
         path: 'products',
         model: 'Product',
@@ -67,6 +68,7 @@ const UserProductsController = (() => {
       },
     });
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -80,15 +82,15 @@ const UserProductsController = (() => {
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
       data: {
-        favouriteUserProducts: user.favouriteUserProducts,
+        favouriteFolder: user.favouriteFolder,
       },
     });
   });
 
-  const getAllUserProducts = tryCatch(async (req, res, next) => {
+  const getAllFolders = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).populate({
-      path: 'userProducts',
-      model: 'UserProduct',
+      path: 'folders',
+      model: 'Folder',
       populate: {
         path: 'products',
         model: 'Product',
@@ -99,6 +101,7 @@ const UserProductsController = (() => {
       },
     });
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -112,14 +115,15 @@ const UserProductsController = (() => {
     res.status(HTTP_STATUS_CODES.OK).json({
       status: 'Success',
       data: {
-        userProducts: user.userProducts,
+        folders: user.folders,
       },
     });
   });
 
-  const deleteUserProducts = tryCatch(async (req, res, next) => {
+  const deleteFolder = tryCatch(async (req, res, next) => {
     const user = req.user.id;
 
+    /* istanbul ignore if */
     if (!user) {
       return next(
         new AppError(
@@ -130,16 +134,14 @@ const UserProductsController = (() => {
       );
     }
 
-    const deletedUserProduct = await UserProducts.findByIdAndDelete(
-      req.params.id
-    );
+    const deletedFolder = await Folders.findByIdAndDelete(req.params.id);
 
-    if (!deletedUserProduct) {
+    if (!deletedFolder) {
       return next(
         new AppError(
           'NotFoundError',
           HTTP_STATUS_CODES.NOT_FOUND,
-          `UserProduct with id ${req.params.id} doesn't exist`
+          `Folder with id ${req.params.id} doesn't exist`
         )
       );
     }
@@ -147,7 +149,7 @@ const UserProductsController = (() => {
     const newUser = await User.findByIdAndUpdate(
       user,
       {
-        $pull: { userProducts: deletedUserProduct._id },
+        $pull: { folders: deletedFolder._id },
       },
       {
         new: true,
@@ -156,7 +158,7 @@ const UserProductsController = (() => {
 
     req.user = newUser;
 
-    res.status(HTTP_STATUS_CODES.OK_POST).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
         newUser,
@@ -164,7 +166,7 @@ const UserProductsController = (() => {
     });
   });
 
-  const deleteProductFromUserProducts = tryCatch(async (req, res, next) => {
+  const deleteProductFromFolder = tryCatch(async (req, res, next) => {
     const product = await Product.findById(req.body.productId);
 
     if (!product) {
@@ -176,7 +178,7 @@ const UserProductsController = (() => {
         )
       );
     }
-    const userProducts = await UserProducts.findByIdAndUpdate(
+    const folder = await Folders.findByIdAndUpdate(
       req.params.id,
       {
         $pull: { products: product._id },
@@ -193,17 +195,27 @@ const UserProductsController = (() => {
       },
     });
 
-    res.status(HTTP_STATUS_CODES.OK_POST).json({
+    res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
-        userProducts,
+        folder,
       },
     });
   });
 
-  const createUserProducts = tryCatch(async (req, res, next) => {
-    let userProducts = await UserProducts.create(req.body);
-    userProducts = await userProducts.populate({
+  const createFolder = tryCatch(async (req, res, next) => {
+    if (!req.body.products || req.body.products.length === 0) {
+      return next(
+        new AppError(
+          'BadRequestError',
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          'Folder must have at least one product'
+        )
+      );
+    }
+
+    let folder = await Folders.create(req.body);
+    folder = await folder.populate({
       path: 'products',
       model: 'Product',
       populate: {
@@ -213,21 +225,31 @@ const UserProductsController = (() => {
     });
 
     const user = await User.findByIdAndUpdate(req.user._id, {
-      $push: { userProducts: userProducts._id },
+      $push: { folders: folder._id },
     });
 
     req.user = user;
+    /* istanbul ignore if */
+    if (!user) {
+      return next(
+        new AppError(
+          'NotFoundError',
+          HTTP_STATUS_CODES.NOT_FOUND,
+          `User with id ${req.user._id} doesn't exist`
+        )
+      );
+    }
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
-        userProducts,
+        folder,
       },
     });
   });
 
-  const addProductToUserProducts = tryCatch(async (req, res, next) => {
-    const userProducts = await UserProducts.findById(req.params.id).populate({
+  const addProductToFolder = tryCatch(async (req, res, next) => {
+    const folder = await Folders.findById(req.params.id).populate({
       path: 'products',
       model: 'Product',
       populate: {
@@ -235,12 +257,12 @@ const UserProductsController = (() => {
         model: 'Shop',
       },
     });
-    if (!userProducts) {
+    if (!folder) {
       return next(
         new AppError(
           'NotFoundError',
           HTTP_STATUS_CODES.NOT_FOUND,
-          `UserProducts with id ${req.params.id} doesn't exist`
+          `Folder with id ${req.params.id} doesn't exist`
         )
       );
     }
@@ -256,28 +278,28 @@ const UserProductsController = (() => {
         )
       );
     }
-    if (!userProducts.products.includes(product._id)) {
-      userProducts.products.push(product._id);
+    if (!folder.products.includes(product._id)) {
+      folder.products.push(product._id);
     }
-    await userProducts.save();
+    await folder.save();
 
     res.status(HTTP_STATUS_CODES.OK_POST).json({
       status: HTTP_STATUS_MESSAGES.OK,
       data: {
-        userProducts,
+        folder,
       },
     });
   });
 
   return {
-    getAllUserProducts,
-    createUserProducts,
-    addProductToUserProducts,
-    addFavouriteUserProducts,
-    getFavouriteUserProducts,
-    deleteUserProducts,
-    deleteProductFromUserProducts,
+    getAllFolders,
+    createFolder,
+    addProductToFolder,
+    setFavouriteFolder,
+    getFavouriteFolder,
+    deleteFolder,
+    deleteProductFromFolder,
   };
 })();
 
-module.exports = UserProductsController;
+module.exports = FoldersController;
