@@ -113,7 +113,7 @@ const UserController = (() => {
     }
   });
 
-  /* istanbul ignore if */
+  /* istanbul ignore next */
   const updatePassword = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).select('+password');
     const isUserValidated = await user.validatePassword(
@@ -152,7 +152,7 @@ const UserController = (() => {
       },
     });
   });
-
+  /* istanbul ignore next */
   const resetPassword = tryCatch(async (req, res, next) => {
     const resetToken = req.params.token;
     const hashedToken = crypto
