@@ -42,6 +42,7 @@ const productPromotionSchema = mongoose.Schema({
     required: function () {
       return this.discountType === 'PERCENTAGE';
     },
+    /* istanbul ignore next */
     select: function () {
       return this.discountType === 'PERCENTAGE';
     },
@@ -54,6 +55,7 @@ const productPromotionSchema = mongoose.Schema({
     required: function () {
       return this.discountType === 'CASH';
     },
+    /* istanbul ignore next */
     select: function () {
       return this.discountType === 'CASH';
     },

@@ -112,7 +112,7 @@ describe('/product route', () => {
         coupons: ['testing-coupon'],
         otherPromotions: [
           {
-            name: '         Multirabaty! Piąty wybrany produkt za 1 zł!            ',
+            name: '   Multirabaty! Piąty wybrany produkt za 1 zł! ',
           },
           {
             url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',
@@ -124,13 +124,21 @@ describe('/product route', () => {
     expect(response.body.data.product.name).toBe(
       'Kuchenka mikrofalowa SAMSUNG GE83X'
     );
-    expect(response.body.data.product.price).toBe(429);
-    expect(response.body.data.product.coupons).toEqual(['testing-coupon']);
-    expect(response.body.data.product.otherPromotions).toHaveLength(2);
-    expect(response.body.data.product.otherPromotions[0].name).toBe(
+
+    expect(response.body.data).toHaveProperty('product');
+    const responseProduct = response.body.data.product;
+    expect(responseProduct).toHaveProperty('price');
+    expect(responseProduct).toHaveProperty('coupons');
+    expect(responseProduct).toHaveProperty('otherPromotions');
+
+
+    expect(responseProduct.price).toBe(429);
+    expect(responseProduct.coupons).toEqual(['testing-coupon']);
+    expect(responseProduct.otherPromotions).toHaveLength(2);
+    expect(responseProduct.otherPromotions[0].name).toBe(
       'Multirabaty! Piąty wybrany produkt za 1 zł!'
     );
-    const product = await Product.findById(response.body.data.product._id);
+    const product = await Product.findById(responseProduct._id);
 
     expect(product.name).toBe('Kuchenka mikrofalowa SAMSUNG GE83X');
     expect(product.price).toBe(429);

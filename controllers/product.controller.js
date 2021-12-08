@@ -203,11 +203,12 @@ const ProductController = (() => {
           if (promotion.type === 'COUPON') {
             product.coupons.push(promotion.coupon);
             if (promotion.discountType === 'PERCENTAGE') {
-              product.price =
+              if(product.price === 0) product.price = 10000000;
+              product.price = Math.min(product.price, 
                 promotion.startingPrice -
-                (promotion.startingPrice * promotion.percentage) / 100;
+                (promotion.startingPrice * promotion.percentage) / 100);
             } else {
-              product.price = promotion.startingPrice - promotion.cash;
+              product.price = Math.min(product.price, promotion.startingPrice - promotion.cash);
             }
           }
         }
