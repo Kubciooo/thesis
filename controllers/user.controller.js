@@ -116,22 +116,8 @@ const UserController = (() => {
   /* istanbul ignore next */
   const updatePassword = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).select('+password');
-    const isUserValidated = await user.validatePassword(
-      req.body.currentPassword
-    );
 
-    if (!isUserValidated) {
-      return next(
-        new AppError(
-          'InvalidUser',
-          HTTP_STATUS_CODES.NOT_FOUND,
-          'Wrong password',
-          true
-        )
-      );
-    }
-
-    user.password = req.body.newPassword;
+    user.password = req.body.password;
     await user.save();
 
     const token = jwt.sign(
