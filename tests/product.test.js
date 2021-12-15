@@ -111,8 +111,7 @@ describe('/product route', () => {
         shop: shopId,
         coupons: ['testing-coupon'],
         otherPromotions: [
-          {
-            name: '   Multirabaty! Piąty wybrany produkt za 1 zł! ',
+                      name: '   Multirabaty! Piąty wybrany produkt za 1 zł! ',
           },
           {
             url: 'https://www.mediaexpert.pl/lp,piaty-produkt-1zl?clickId=112918',

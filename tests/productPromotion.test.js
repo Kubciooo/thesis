@@ -66,7 +66,7 @@ describe('/promotions/product route', () => {
         name: 'new product',
         category: categoryId,
         shop: shop._id,
-        price: 100,
+        price: 1500,
         url: 'https://www.x-kom.pl/',
       });
 

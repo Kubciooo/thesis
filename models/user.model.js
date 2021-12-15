@@ -100,12 +100,22 @@ const userSchema = mongoose.Schema({
   },
 });
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || !this.isNew) return next();
-  this.passwordChangedAt = Date.now() - 1000;
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+
   this.password = await encryptPassword(this.password);
+  this.passwordConfirm = undefined;
   next();
 });
+
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+
 
 userSchema.methods.validatePassword = async function (password) {
   return comparePasswords(password, this.password);
