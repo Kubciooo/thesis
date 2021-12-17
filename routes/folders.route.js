@@ -1,6 +1,10 @@
 const express = require('express');
 const userProductsController = require('../controllers/folders.controller');
 
+/**
+ * Tworzenie ścieżki dla folderów.
+ * Poniżej znajdują się wszystkie ścieżki dla folderów.
+ */
 const foldersRoute = express.Router();
 
 foldersRoute

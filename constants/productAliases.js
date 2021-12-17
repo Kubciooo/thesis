@@ -1,3 +1,6 @@
+/**
+ * Aliasy produktów
+ */
 const PRODUCT_ALIASES = {
   ram: 'pamięć',
   pamięć: 'ram',

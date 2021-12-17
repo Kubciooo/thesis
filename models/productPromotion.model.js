@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+/**
+ * Model promocji produktu. 
+ */
 const productPromotionSchema = mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,

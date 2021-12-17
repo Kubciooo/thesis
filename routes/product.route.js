@@ -1,6 +1,10 @@
 const express = require('express');
 const ProductController = require('../controllers/product.controller');
 
+/**
+ * Tworzenie ścieżki dla produktów.
+ * Poniżej znajdują się wszystkie ścieżki dla produktów.
+ */
 const productRouter = express.Router();
 
 productRouter

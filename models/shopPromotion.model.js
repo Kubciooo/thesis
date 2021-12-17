@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+/**
+ * Model promocji sklepu - jest to przykład możliwego rozwoju aplikacji.
+ */
 const shopPromotionSchema = mongoose.Schema({
   url: {
     type: String,

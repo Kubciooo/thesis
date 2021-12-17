@@ -13,7 +13,13 @@ const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const SITES_CONFIG = require('../constants/sites');
 
+/**
+ * Controller produktów - zarządzanie produktami
+ */
 const ProductController = (() => {
+  /**
+   * Obserwowanie produktu
+   */
   const addFavouriteProduct = tryCatch(async (req, res, next) => {
     const { productId } = req.body;
     const userId = req.user._id;
@@ -51,6 +57,9 @@ const ProductController = (() => {
     });
   });
 
+  /**
+   * pobranie ulubionego produktu dla użytkownika
+   */
   const getFavouriteProduct = tryCatch(async (req, res, next) => {
     const userId = req.user._id;
 
@@ -81,6 +90,10 @@ const ProductController = (() => {
       },
     });
   });
+
+  /**
+   * Dodanie produktów ze sklepów do bazy danych
+   */
   /* istanbul ignore next */
   const addProductsFromScrapper = tryCatch(async (req, res, next) => {
     if (
@@ -223,6 +236,9 @@ const ProductController = (() => {
     });
   });
 
+  /**
+   * Tworzenie nowego produktu
+   */
   const createProduct = tryCatch(async (req, res, next) => {
     const product = await Product.create(req.body);
 
@@ -234,6 +250,9 @@ const ProductController = (() => {
     });
   });
 
+  /**
+   * Pobieranie produktu po id 
+   */
   const getProductById = tryCatch(async (req, res, next) => {
     const product = await Product.findById(req.params.id);
 
@@ -255,6 +274,9 @@ const ProductController = (() => {
     });
   });
 
+  /**
+   * Zaobserwowanie produktu po id
+   */
   const followProductById = tryCatch(async (req, res, next) => {
     const productId = req.params.id;
 
@@ -280,6 +302,9 @@ const ProductController = (() => {
         )
       );
     }
+    /**
+     * Sprawdzenie czy produkt nie jest już obserwowany przez użytkownika
+     */
     if (!user.products.includes(productId)) {
       await User.findByIdAndUpdate(
         req.user._id,
@@ -300,6 +325,9 @@ const ProductController = (() => {
     });
   });
 
+  /**
+   * Usunięcie prodktu z obserwowanych
+   */
   const unfollowProductById = tryCatch(async (req, res, next) => {
     const productId = req.params.id;
 
@@ -344,6 +372,9 @@ const ProductController = (() => {
     });
   });
 
+  /**
+   * Pobranie wszystkich obserwowanych produktów
+   */
   const getAllFollowedProducts = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).populate({
       path: 'products',

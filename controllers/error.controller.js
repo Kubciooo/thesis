@@ -2,7 +2,15 @@ const AppError = require('../services/error.service');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 
+/**
+ * Kontroler błędów - zarządzanie błędami
+ */
 const ErrorController = (() => {
+  /**
+   * Błąd z duplikatami w bazie danych
+   * @param {*} err - błąd
+   * @returns
+   */
   const handleDuplicates = (err) => {
     const fieldValue = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
     const message = `The value ${fieldValue} already exists in DB - please use other value`;
@@ -12,6 +20,11 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+  /**
+   * Błąd z nieprawidłowym formatem danych
+   * @param {*} err - błąd
+   * @returns
+   */
   const handleCastError = (err) => {
     const message = `Invalid ${err.path}: ${err.value}.`;
     const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
@@ -20,6 +33,11 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+  /**
+   * Błąd dotyczący walidacji danych
+   * @param {*} err - błąd
+   * @returns
+   */
   const handleValidationError = (err) => {
     const errors = Object.values(err.errors).map((el) => el.message);
     const message = `Invalid input data. ${errors.join('. ')}`;
@@ -29,6 +47,10 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+  /**
+   * Błąd dotyczący JWT
+   * @returns {AppError} - błąd
+   */
   const handleJWTInvalidError = () => {
     const message = `Invalid JWT token`;
     const statusCode = HTTP_STATUS_CODES.INVALID;
@@ -37,6 +59,10 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+  /**
+   * Błąd dotyczący wygasłego tokena
+   * @returns {AppError} - błąd
+   */
   const handleJWTExpiredError = () => {
     const message = `Expired JWT token`;
     const statusCode = HTTP_STATUS_CODES.INVALID;
@@ -45,6 +71,11 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+  /**
+   * Inne błędy
+   * @param {*} err - błąd
+   * @returns
+   */
   const handleOtherError = (err) => {
     const { message } = err;
     const statusCode = err.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER;
@@ -53,6 +84,11 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+  /**
+   * Wyświetla błąd
+   * @param {*} err
+   * @param {*} res
+   */
   const sendErrorToClient = (err, res) => {
     const { message, statusCode, name } = err;
     res.status(statusCode).json({
@@ -62,6 +98,11 @@ const ErrorController = (() => {
     });
   };
 
+  /**
+   * Obsługa błędów 
+   * @param {*} err 
+   * @returns 
+   */
   const findError = (err) => {
     if (err.code === 11000) return handleDuplicates(err);
     switch (err.name) {

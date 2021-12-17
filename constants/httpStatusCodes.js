@@ -1,3 +1,6 @@
+/**
+ * Kody statusów HTTP
+ */
 const HTTP_STATUS_CODES = {
   OK: 200,
   OK_POST: 201,

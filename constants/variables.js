@@ -1,3 +1,6 @@
+/**
+ * Zmienne globalne
+ */
 module.exports = {
   database: {
     development:

@@ -5,8 +5,14 @@ const UserController = require('../controllers/user.controller');
 const AuthorizationMiddleware = require('../middlewares/authorization.middleware');
 const FoldersController = require('../controllers/folders.controller');
 
+/**
+ * Tworzenie ścieżki dla użytkownika i dodawanie do aplikacji express
+ */
 const userRouter = express.Router();
 
+/**
+ * Poniżej znajdują się wszystkie ścieżki dla użytkownika
+ */
 userRouter.route('/signup').post(UserController.signup);
 userRouter.route('/login').post(UserController.login);
 userRouter.route('/forgotPassword').post(UserController.forgotPassword);

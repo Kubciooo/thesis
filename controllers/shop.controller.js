@@ -4,7 +4,13 @@ const tryCatch = require('../utils/tryCatch.util');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 
+/**
+ * Controller sklepu - zarządzanie sklepami
+ */
 const ShopController = (() => {
+  /**
+   * Pobranie wszystkich sklepów
+   */
   const getAllShops = tryCatch(async (req, res, next) => {
     const shops = await Shop.find();
 
@@ -16,6 +22,9 @@ const ShopController = (() => {
     });
   });
 
+  /**
+   * Dodanie sklepu
+   */
   const createShop = tryCatch(async (req, res, next) => {
     const shop = await Shop.create(req.body);
 
@@ -27,6 +36,9 @@ const ShopController = (() => {
     });
   });
 
+  /**
+   * Pobranie sklepu po id
+   */
   const getShopById = tryCatch(async (req, res, next) => {
     const shop = await Shop.findById(req.params.id);
 

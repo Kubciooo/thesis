@@ -6,6 +6,9 @@ const {
   generatePasswordForgotToken,
 } = require('../utils/password.util');
 
+/**
+ * Model użytkownika
+ */
 const userSchema = mongoose.Schema({
   login: {
     type: String,
@@ -100,6 +103,9 @@ const userSchema = mongoose.Schema({
   },
 });
 
+/**
+ * Przed zapisem użytkownika do bazy danych, zahaszuj hasło
+ */
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
@@ -108,6 +114,9 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
+/**
+ * Przed zapisem użytkownika do bazy danych, sprawdź czy hasło zostało zmienione. Jeżeli tak, to ustaw datę zmiany hasła.
+ */
 userSchema.pre('save', function(next) {
   if (!this.isModified('password') || this.isNew) return next();
 
@@ -116,11 +125,20 @@ userSchema.pre('save', function(next) {
 });
 
 
-
+/**
+ * Funkcja porównująca dwa hasła za pomocą biblioteki bcrypt
+ * @param {String} password- hasło do porównania
+ * @returns {Boolean} - true jeżeli hasła się zgadzają, false jeżeli nie
+ */
 userSchema.methods.validatePassword = async function (password) {
   return comparePasswords(password, this.password);
 };
 
+/**
+ * Funckja sprawdzająca czy token resetujący hasło jest ważny
+ * @param {Integer} JWTTimestamp 
+ * @returns {Boolean} - true jeżeli token jest ważny, false jeżeli nie
+ */
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
@@ -133,6 +151,10 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
+/**
+ * Funkcja generująca token resetujący hasło użytkownika
+ * @returns {String} - token resetujący hasło
+ */
 userSchema.methods.forgotPasswordToken = async function () {
   const { randomToken, randomTokenEncrypted } =
     await generatePasswordForgotToken();

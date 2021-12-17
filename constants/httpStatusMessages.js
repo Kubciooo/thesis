@@ -1,3 +1,6 @@
+/**
+ * Wiadomości HTTP
+ */
 const HTTP_STATUS_MESSAGES = {
   OK: 'success',
   ERROR: 'error',

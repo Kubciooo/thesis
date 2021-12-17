@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+/**
+ * Model sklepu 
+ */
 const shopSchema = mongoose.Schema({
   name: {
     trim: true,

@@ -1,3 +1,6 @@
+/**
+ * Klasa do niestandardowej obsługi błędów
+ */
 class AppError extends Error {
   constructor(name, statusCode, message, isOperational = true) {
     super(message);

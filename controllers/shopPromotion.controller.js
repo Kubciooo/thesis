@@ -5,6 +5,9 @@ const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const Shop = require('../models/shop.model');
 
+/**
+ * Controller promocji sklepu - zarządzanie promocjami sklepu (rozszerzenie kontrolera promocji)
+ */
 const ShopPromotionController = (() => {
   const getAllShopPromotions = tryCatch(async (req, res, next) => {
     const shopPromotions = await ShopPromotion.find(req.query).sort(

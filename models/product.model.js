@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+/**
+ * Model produktu
+ */
 const productSchema = mongoose.Schema({
   url: {
     type: String,

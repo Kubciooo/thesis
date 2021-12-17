@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+/**
+ * Model folderu
+ */
 const folderSchema = mongoose.Schema({
   name: {
     type: String,

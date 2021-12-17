@@ -8,7 +8,13 @@ const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const variables = require('../constants/variables');
 const Emails = require('../utils/emails.util');
 
+/**
+ * Controller użytkownika - zarządzanie użytkownikami
+ */
 const UserController = (() => {
+  /**
+   * Rejestracja użytkownika
+   */
   const signup = tryCatch(async (req, res, next) => {
     if (req.body.password !== req.body.retypePassword) {
       return next(
@@ -21,6 +27,9 @@ const UserController = (() => {
       );
     }
 
+    /**
+     * Sprawdzenie czy użytkownik o podanym loginie nie istnieje
+     */
     const user = User({
       login: req.body.login,
       email: req.body.email,
@@ -44,14 +53,27 @@ const UserController = (() => {
       },
     });
   });
-
+  
+  /**
+   * Logowanie użytkownika
+   */
   const login = tryCatch(async (req, res, next) => {
+    /**
+     * Dodanie hasła do zapytania (w celu zabezpieczenia przed atakami SQL injection)
+     */
     const user = await User.findOne({ login: req.body.login }).select(
       '+password'
     );
+    /**
+     * Sprawdzenie czy użytkownik istnieje i czy hasło jest poprawne
+     */
     const isUserValidated =
       user && (await user.validatePassword(req.body.password));
 
+    /**
+     * Jeśli użytkownik istnieje i hasło jest poprawne, tworzymy token i zwracamy go
+     * Jeśli użytkownik nie istnieje lub hasło jest niepoprawne, zwracamy błąd
+     */
     if (!isUserValidated) {
       return next(
         new AppError(
@@ -80,6 +102,9 @@ const UserController = (() => {
     });
   });
 
+  /**
+   * Zapomnienie hasła
+   */
   /* istanbul ignore next */
   const forgotPassword = tryCatch(async (req, res, next) => {
     const user = await User.findOne({ login: req.body.login });
@@ -93,11 +118,16 @@ const UserController = (() => {
         )
       );
     }
-
+    /**
+     * Generowanie tokenu
+     */
     const resetToken = await user.forgotPasswordToken();
 
     await user.save({ validateBeforeSave: false });
     try {
+      /**
+       * Wysłanie emaila z linkiem do zmiany hasła
+       */
       await Emails.send(user.email, resetToken);
 
       res.status(HTTP_STATUS_CODES.OK).json({
@@ -113,8 +143,14 @@ const UserController = (() => {
     }
   });
 
+  /**
+   * Zmiana hasła
+   */
   /* istanbul ignore next */
   const updatePassword = tryCatch(async (req, res, next) => {
+    /**
+     * Dodanie hasła do zapytania (w celu zabezpieczenia przed atakami SQL injection)
+     */
     const user = await User.findById(req.user._id).select('+password');
 
     user.password = req.body.password;

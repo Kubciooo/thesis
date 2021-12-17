@@ -6,7 +6,13 @@ const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 const Product = require('../models/product.model');
 
+/**
+ * Controller folderów - zarządzanie folderami
+ */
 const FoldersController = (() => {
+  /**
+   * Ustawienie folderu jako głównego
+   */
   const setFavouriteFolder = tryCatch(async (req, res, next) => {
     const { folderId } = req.body;
     const userId = req.user._id;
@@ -52,6 +58,9 @@ const FoldersController = (() => {
     });
   });
 
+  /**
+   * Pobranie folderu głównego
+   */
   const getFavouriteFolder = tryCatch(async (req, res, next) => {
     const userId = req.user._id;
 
@@ -87,6 +96,9 @@ const FoldersController = (() => {
     });
   });
 
+  /**
+   * Pobranie folderów użytkownika
+   */
   const getAllFolders = tryCatch(async (req, res, next) => {
     const user = await User.findById(req.user._id).populate({
       path: 'folders',
@@ -120,6 +132,9 @@ const FoldersController = (() => {
     });
   });
 
+  /**
+   * Usunięcie folderu
+   */
   const deleteFolder = tryCatch(async (req, res, next) => {
     const user = req.user.id;
 
@@ -166,6 +181,9 @@ const FoldersController = (() => {
     });
   });
 
+  /**
+   * Usunięcie produktu z folderu
+   */
   const deleteProductFromFolder = tryCatch(async (req, res, next) => {
     const product = await Product.findById(req.body.productId);
 
@@ -203,6 +221,9 @@ const FoldersController = (() => {
     });
   });
 
+  /**
+   * Stworzenie folderu
+   */
   const createFolder = tryCatch(async (req, res, next) => {
     if (!req.body.products || req.body.products.length === 0) {
       return next(
@@ -248,6 +269,9 @@ const FoldersController = (() => {
     });
   });
 
+  /**
+   * Dodanie produktu do folderu
+   */
   const addProductToFolder = tryCatch(async (req, res, next) => {
     const folder = await Folders.findById(req.params.id).populate({
       path: 'products',
@@ -278,6 +302,10 @@ const FoldersController = (() => {
         )
       );
     }
+
+    /**
+     * Sprawdzenie czy produkt nie jest już w folderze
+     */
     if (!folder.products.includes(product._id)) {
       folder.products.push(product._id);
     }

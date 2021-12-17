@@ -5,9 +5,18 @@ const tryCatch = require('../utils/tryCatch.util');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const variables = require('../constants/variables');
 
+/**
+ * Middleware autoryzacji użytkownika - sprawdza czy użytkownik jest zalogowany i czy ma dostęp do danego endpointu (zwraca 401 jeśli nie)
+ */
 const AuthorizationMiddleware = (() => {
+  /**
+   * Funkcja sprawdzająca czy użytkownik jest zalogowany i czy ma dostęp do danego endpointu
+   */
   const authorize = tryCatch(async (req, res, next) => {
     let token;
+    /**
+     * Sprawdzenie czy token jest w nagłówku
+     */
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
@@ -23,10 +32,16 @@ const AuthorizationMiddleware = (() => {
         )
       );
     }
+    /**
+     * Sprawdzenie czy token jest ważny
+     */
     const decoded = jwt.verify(
       token,
       variables.jwtSecret.password[process.env.NODE_ENV]
     );
+    /**
+     * Sprawdzenie czy użytkownik istnieje
+     */
     const user = await User.findById(decoded.id);
 
     /* istanbul ignore if */
@@ -40,6 +55,9 @@ const AuthorizationMiddleware = (() => {
       );
     }
 
+    /**
+     * Sprawdzenie czy użytkownik jest zalogowany i czy hasło nie zostało zmienione w ciągu czasu (zmiana hasła wymaga nowego tokena)
+     */
     if (user.changedPasswordAfter(decoded.iat)) {
       return next(
         new AppError(

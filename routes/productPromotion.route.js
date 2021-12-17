@@ -1,6 +1,10 @@
 const express = require('express');
 const ProductPromotionController = require('../controllers/productPromotion.controller');
 
+/**
+ * Tworzenie ścieżki dla promocji produktów.
+ * Poniżej znajdują się wszystkie ścieżki dla promocji produktów.
+ */
 const productPromotionRouter = express.Router();
 
 productPromotionRouter

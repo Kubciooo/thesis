@@ -4,7 +4,13 @@ const tryCatch = require('../utils/tryCatch.util');
 const HTTP_STATUS_CODES = require('../constants/httpStatusCodes');
 const HTTP_STATUS_MESSAGES = require('../constants/httpStatusMessages');
 
+/**
+ * Controller kategorii - zarządzanie kategoriami
+ */
 const CategoryController = (() => {
+  /**
+   * Pobranie wszystkich kategorii
+   */
   const getAllCategories = tryCatch(async (req, res, next) => {
     const categories = await Category.find();
 
@@ -16,6 +22,9 @@ const CategoryController = (() => {
     });
   });
 
+  /**
+   * Dodanie kategorii
+   */
   const createCategory = tryCatch(async (req, res, next) => {
     const category = await Category.create(req.body);
 
@@ -27,6 +36,9 @@ const CategoryController = (() => {
     });
   });
 
+  /**
+   * Pobranie kategorii po id
+   */
   const getCategoryById = tryCatch(async (req, res, next) => {
     const category = await Category.findById(req.params.id);
 
