@@ -71,6 +71,19 @@ const ErrorController = (() => {
     return new AppError(name, statusCode, message, isOperational);
   };
 
+
+  /**
+   * Błąd dotyczący nieprawidłowego kuponu
+   * @returns {AppError} - błąd
+   */
+  const handleCouponInvalidError = () => {
+    const message = `Invalid coupon`;
+    const statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
+    const name = 'Coupon Error';
+    const isOperational = true;
+    return new AppError(name, statusCode, message, isOperational);
+  };
+
   /**
    * Inne błędy
    * @param {*} err - błąd
@@ -114,6 +127,8 @@ const ErrorController = (() => {
         return handleJWTInvalidError();
       case 'TokenExpiredError':
         return handleJWTExpiredError();
+      case 'InvalidCouponError':
+        return handleCouponInvalidError();
       default:
         return handleOtherError(err);
     }

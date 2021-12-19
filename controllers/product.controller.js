@@ -163,7 +163,9 @@ const ProductController = (() => {
       const productDB = await Product.findOne({ url: prod.url });
 
       if (!productDB) {
-        products.push(await Product.create(prod));
+        await Product.create(prod);
+        const product = await Product.findOne({ url: prod.url }).populate('shop');
+        products.push(product);
       }
     }
 
