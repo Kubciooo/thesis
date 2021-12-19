@@ -215,9 +215,13 @@ const Scrapper = (() => {
       await btn.evaluate((el) => el.click());
 
       for (const basketSelector of additionalBasketSelectors) {
-        await waitRandomTime(page, actionDelay);
-        await page.waitForSelector(basketSelector);
-        await page.$eval(basketSelector, (el) => el.click());
+        try {
+          await waitRandomTime(page, actionDelay);
+          await page.waitForSelector(basketSelector);
+          await page.$eval(basketSelector, (el) => el.click());
+        } catch(e) {
+          console.log('Skipping additional basket selector');
+        }
       }
 
       await page.waitForSelector(couponInputSelector);
@@ -432,7 +436,7 @@ const Scrapper = (() => {
    */
   const updateAllProductsFromDB = async () => {
     console.log('Starting DB update...');
-    const products = await Product.find({}).populate('shop');
+    const products = await Product.find().populate('shop');
     console.log(`Found products: ${products.length}`);
     let i = 0;
     for (const product of products) {
@@ -460,7 +464,7 @@ const Scrapper = (() => {
               workingCoupons.push(coupon);
             }
           } catch (error) {
-            console.log(error);
+            console.log('Coupon error: ', error);
           }
         }
         newProductSnapshot = {

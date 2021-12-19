@@ -168,6 +168,7 @@ const SITES_CONFIG = {
       addToBasketButtonSelector: '.add-to-cart',
       additionalBasketSelectors: [
         '.precart-main.has-background .close .icon.icon-x02',
+        '.utility-nav-item.cart'
       ],
       couponInputSelector: 'input[placeholder="Kod rabatowy"]',
       couponActivateSelector:
