@@ -24,13 +24,13 @@ mongoose
     /**
      * Cykliczna aktualizacja produktów z bazy danych
      */
-    updateAllProductsFromDB();
+    // updateAllProductsFromDB(); // włączyć w przypadku chęci aktualizacji produktów z bazy danych za każdym razem, gdy zostanie uruchomiony serwer
     setInterval(updateAllProductsFromDB, milisecondsFromHours(3));
   });
 
-  /**
-   * Nasłuch na port
-   */
+/**
+ * Nasłuch na port
+ */
 const port = process.env.PORT || 8080;
 
 /**

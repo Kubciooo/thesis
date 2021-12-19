@@ -213,15 +213,20 @@ const ProductController = (() => {
     for (const product of productsData) {
       for (const promotion of currentUser.productPromotions) {
         if (product._id.equals(promotion.product)) {
-          if (promotion.type === 'COUPON') {
+          if (promotion.type === 'COUPON' || promotion.type === 'PROMOTION') {
             product.coupons.push(promotion.coupon);
             if (promotion.discountType === 'PERCENTAGE') {
-              if(product.price === 0) product.price = 10000000;
-              product.price = Math.min(product.price, 
+              if (product.price === 0) product.price = 10000000;
+              product.price = Math.min(
+                product.price,
                 promotion.startingPrice -
-                (promotion.startingPrice * promotion.percentage) / 100);
+                  (promotion.startingPrice * promotion.percentage) / 100
+              );
             } else {
-              product.price = Math.min(product.price, promotion.startingPrice - promotion.cash);
+              product.price = Math.min(
+                product.price,
+                promotion.startingPrice - promotion.cash
+              );
             }
           }
         }
@@ -251,7 +256,7 @@ const ProductController = (() => {
   });
 
   /**
-   * Pobieranie produktu po id 
+   * Pobieranie produktu po id
    */
   const getProductById = tryCatch(async (req, res, next) => {
     const product = await Product.findById(req.params.id);

@@ -18,12 +18,14 @@ const ProductPromotionController = (() => {
     /**
      * Pobranie wszystkich promocji produktów z bazy danych i sortowanie ich wg daty wygaśnięcia (od najnowszych)
      */
+    if (req.query.hot) {
+      req.query.rating = { $gte: req.user.userFavouritesMinUsers };
+      delete req.query.hot;
+    }
+
     let productPromotions = await ProductPromotion.find({
       ...req.query,
-      /**
-       * Pobranie tylko promocji o liczbie obserwujących większej niż podana przez użytkownika
-       */
-      rating: { $gte: req.user.userFavouritesMinUsers },
+      expiresAt: { $gt: Date.now() },
     })
       .sort('-expiresAt')
       .populate('product');
@@ -146,6 +148,10 @@ const ProductPromotionController = (() => {
       },
     });
 
+    user.productPromotions = user.productPromotions.filter(
+      (promotion) => promotion.expiresAt > Date.now()
+    );
+
     let { productPromotions } = user;
 
     for (let i = 0; i < req.user.blockedShops.length; i += 1) {
@@ -249,6 +255,7 @@ const ProductPromotionController = (() => {
     const product = await Product.findById(req.params.id);
     const productPromotions = await ProductPromotion.find({
       product: req.params.id,
+      expiresAt: { $gt: Date.now() },
     }).sort('-expiresAt');
 
     if (!product) {
@@ -271,12 +278,13 @@ const ProductPromotionController = (() => {
 
   /**
    * Pobranie listy promocji produktu dla danego produktu po url produktu
-  */
+   */
   /* istanbul ignore next */
   const getProductPromotionsByProductUrl = tryCatch(async (req, res, next) => {
     const product = await Product.findOne({ url: req.params.url });
     const productPromotions = await ProductPromotion.find({
       product: product._id,
+      expiresAt: { $gt: Date.now() },
     }).sort('-expiresAt');
 
     if (!product) {
