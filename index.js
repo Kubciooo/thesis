@@ -24,7 +24,7 @@ mongoose
     /**
      * Cykliczna aktualizacja produktów z bazy danych
      */
-    updateAllProductsFromDB(); // włączyć w przypadku chęci aktualizacji produktów z bazy danych za każdym razem, gdy zostanie uruchomiony serwer
+    // updateAllProductsFromDB(); // włączyć w przypadku chęci aktualizacji produktów z bazy danych za każdym razem, gdy zostanie uruchomiony serwer
     setInterval(updateAllProductsFromDB, milisecondsFromHours(3));
   });
 

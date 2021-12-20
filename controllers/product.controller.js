@@ -214,9 +214,12 @@ const ProductController = (() => {
 
     for (const product of productsData) {
       for (const promotion of currentUser.productPromotions) {
+        console.log(promotion);
         if (product._id.equals(promotion.product)) {
           if (promotion.type === 'COUPON' || promotion.type === 'PROMOTION') {
-            product.coupons.push(promotion.coupon);
+            if (promotion.type === 'COUPON') {
+              product.coupons.push(promotion.coupon);
+            }
             if (promotion.discountType === 'PERCENTAGE') {
               if (product.price === 0) product.price = 10000000;
               product.price = Math.min(
@@ -230,6 +233,8 @@ const ProductController = (() => {
                 promotion.startingPrice - promotion.cash
               );
             }
+
+            console.log(product);
           }
         }
       }
