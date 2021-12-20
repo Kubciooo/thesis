@@ -214,8 +214,8 @@ const ProductController = (() => {
 
     for (const product of productsData) {
       for (const promotion of currentUser.productPromotions) {
-        console.log(promotion);
         if (product._id.equals(promotion.product)) {
+          /* instanbul ignore-next */
           if (promotion.type === 'COUPON' || promotion.type === 'PROMOTION') {
             if (promotion.type === 'COUPON') {
               product.coupons.push(promotion.coupon);
