@@ -111,6 +111,7 @@ describe('/product route', () => {
         shop: shopId,
         coupons: ['testing-coupon'],
         otherPromotions: [
+          {
                       name: '   Multirabaty! Piąty wybrany produkt za 1 zł! ',
           },
           {
