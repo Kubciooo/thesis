@@ -93,7 +93,7 @@ describe('/promotions/shop route', () => {
           type: 'COUPON',
           coupon: 'testing coupon',
           discountType: 'percentage',
-          expiresAt: Date.now() + 10,
+          expiresAt: Date.now() + 1000,
           percentage: 99,
         });
     }
