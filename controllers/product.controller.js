@@ -164,7 +164,9 @@ const ProductController = (() => {
 
       if (!productDB) {
         await Product.create(prod);
-        const product = await Product.findOne({ url: prod.url }).populate('shop');
+        const product = await Product.findOne({ url: prod.url }).populate(
+          'shop'
+        );
         products.push(product);
       }
     }
@@ -232,8 +234,6 @@ const ProductController = (() => {
                 promotion.startingPrice - promotion.cash
               );
             }
-
-            console.log(product);
           }
         }
       }

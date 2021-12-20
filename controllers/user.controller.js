@@ -53,7 +53,7 @@ const UserController = (() => {
       },
     });
   });
-  
+
   /**
    * Logowanie użytkownika
    */
@@ -210,7 +210,6 @@ const UserController = (() => {
     }
 
     user.password = req.body.password;
-    console.log(user.password);
     user.passwordForgotToken = undefined;
     user.passwordForgotTokenExpiration = undefined;
     await user.save();
