@@ -219,7 +219,7 @@ const Scrapper = (() => {
           await waitRandomTime(page, actionDelay);
           await page.waitForSelector(basketSelector);
           await page.$eval(basketSelector, (el) => el.click());
-        } catch(e) {
+        } catch (e) {
           console.log('Skipping additional basket selector');
         }
       }
@@ -462,6 +462,8 @@ const Scrapper = (() => {
             if (priceBefore !== priceAfter && priceAfter < minPrice) {
               minPrice = priceAfter;
               workingCoupons.push(coupon);
+            } else if (priceAfter != 0 && priceAfter < minPrice) {
+              minPrice = priceAfter;
             }
           } catch (error) {
             console.log('Coupon error: ', error);
