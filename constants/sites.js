@@ -23,6 +23,7 @@ const SITES_CONFIG = {
       addToBasketButtonSelector:
         '.spark-button.add-button.is-primary.is-medium.icon-left.show-price-button',
       additionalBasketSelectors: [
+        '.spark-button',
         '.select .ui-radio .inner',
         'label.js-discountCode_toggleTrigger',
       ],
