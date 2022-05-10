@@ -44,7 +44,7 @@
     "puppeteer-extra-plugin-stealth": "^2.9.0",
     "selenium-webdriver": "^4.1.0",
     "slugify": "^1.6.1",
-    "validator": "^13.6.0"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "arkit": "^1.6.4",
